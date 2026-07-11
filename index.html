@@ -245,6 +245,37 @@
     .m-gallery{min-height:240px}
   }
 
+  /* ---------- PRELOADER ---------- */
+  .preloader{position:fixed;inset:0;z-index:200;background:#08080a;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:22px}
+  .preloader .pl-brand{font-family:"Syncopate";font-size:clamp(22px,4vw,38px);font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:#fff;overflow:hidden}
+  .preloader .pl-brand span{color:var(--gold);display:inline-block}
+  .pl-bar{width:min(320px,60vw);height:2px;background:rgba(255,255,255,.12);overflow:hidden;border-radius:2px}
+  .pl-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-2))}
+  .pl-pct{font-size:12px;letter-spacing:.3em;color:var(--muted)}
+  .pl-panels{position:fixed;inset:0;z-index:199;display:flex;pointer-events:none}
+  .pl-panels i{flex:1;background:#08080a}
+
+  /* ---------- CUSTOM CURSOR ---------- */
+  .cursor-dot,.cursor-ring{position:fixed;top:0;left:0;z-index:300;pointer-events:none;
+    border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:difference}
+  .cursor-dot{width:7px;height:7px;background:var(--gold-2)}
+  .cursor-ring{width:38px;height:38px;border:1.5px solid rgba(240,212,136,.7);transition:width .3s,height .3s,background .3s,border-color .3s}
+  .cursor-ring.hot{width:64px;height:64px;background:rgba(240,212,136,.12);border-color:var(--gold-2)}
+  body.has-cursor{cursor:none}
+  body.has-cursor a,body.has-cursor button,body.has-cursor .car{cursor:none}
+  @media (hover:none),(pointer:coarse){ .cursor-dot,.cursor-ring{display:none!important} body.has-cursor{cursor:auto} }
+
+  /* ---------- FILM GRAIN ---------- */
+  .grain{position:fixed;inset:-50%;z-index:150;pointer-events:none;opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grain 1s steps(4) infinite}
+  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-4%,3%)}50%{transform:translate(3%,-4%)}75%{transform:translate(-3%,-3%)}100%{transform:translate(4%,3%)}}
+
+  /* clip reveal helper for card images */
+  .car .img img{clip-path:inset(0 0 0 0)}
+
   .reveal{opacity:0}
 
   @media(max-width:900px){
@@ -261,6 +292,19 @@
 </style>
 </head>
 <body>
+
+<!-- PRELOADER -->
+<div class="preloader" id="preloader">
+  <div class="pl-brand">APEX<span>·</span>EXOTICS</div>
+  <div class="pl-bar"><i id="plBar"></i></div>
+  <div class="pl-pct" id="plPct">0%</div>
+</div>
+<div class="pl-panels" id="plPanels"><i></i><i></i><i></i><i></i><i></i></div>
+
+<!-- FILM GRAIN + CUSTOM CURSOR -->
+<div class="grain"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-dot" id="cursorDot"></div>
 
 <!-- NAV -->
 <nav id="nav">
@@ -452,9 +496,10 @@
   </div>
 </div>
 
-<!-- GSAP -->
+<!-- GSAP + Lenis smooth scroll -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
@@ -537,7 +582,8 @@ title.innerHTML = title.innerHTML.replace(/<span class="g">(.*?)<\/span>/,(m,p)=
   });
 })(title);
 
-const tl=gsap.timeline({defaults:{ease:"power4.out"}});
+const tl=gsap.timeline({defaults:{ease:"power4.out"},paused:true});
+window.heroTL=tl;
 tl.from("#heroBg",{scale:1.35,duration:2.2,ease:"power2.out"},0)
   .from("#kicker",{y:24,opacity:0,duration:.8},.2)
   .from("#heroTitle .char",{yPercent:120,opacity:0,stagger:.03,duration:1},.35)
@@ -663,6 +709,82 @@ function closePreview(){
 document.getElementById("modalClose").addEventListener("click",closePreview);
 modalBg.addEventListener("click",closePreview);
 window.addEventListener("keydown",e=>{ if(e.key==="Escape" && modal.classList.contains("open")) closePreview(); });
+
+/* =======================================================
+   PREMIUM LAYER — smooth scroll · preloader · cursor · magnetic
+   ======================================================= */
+
+/* --- Lenis smooth scroll, synced to ScrollTrigger --- */
+let lenis=null;
+if(window.Lenis){
+  lenis=new Lenis({duration:1.15,smoothWheel:true,
+    easing:t=>Math.min(1,1.001-Math.pow(2,-10*t))});
+  lenis.on("scroll",ScrollTrigger.update);
+  gsap.ticker.add(t=>lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
+  lenis.stop(); // locked until preloader finishes
+}
+/* smooth anchor links */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener("click",e=>{
+    const t=document.querySelector(a.getAttribute("href"));
+    if(t){ e.preventDefault(); lenis? lenis.scrollTo(t,{offset:-70}) : t.scrollIntoView({behavior:"smooth"}); }
+  });
+});
+
+/* --- Preloader sequence --- */
+(function preloader(){
+  const pre=document.getElementById("preloader");
+  const bar=document.getElementById("plBar");
+  const pct=document.getElementById("plPct");
+  const done=()=>{ lenis&&lenis.start(); window.heroTL&&window.heroTL.play(0); ScrollTrigger.refresh(); };
+  gsap.timeline()
+    .to(bar,{width:"100%",duration:1.5,ease:"power1.inOut",
+      onUpdate:function(){ pct.textContent=Math.round(this.progress()*100)+"%"; }})
+    .to([".pl-brand",".pl-bar",".pl-pct"],{opacity:0,y:-18,duration:.5,ease:"power2.in"},"+=.15")
+    .set(pre,{display:"none"})
+    .to("#plPanels i",{yPercent:-100,duration:.85,stagger:.07,ease:"power4.inOut"},"-=.05")
+    .add(done,"-=.45")
+    .set("#plPanels",{display:"none"});
+})();
+
+/* --- Custom gold cursor (desktop / fine-pointer only) --- */
+if(matchMedia("(hover:hover) and (pointer:fine)").matches){
+  const dot=document.getElementById("cursorDot"), ring=document.getElementById("cursorRing");
+  document.body.classList.add("has-cursor");
+  gsap.set([dot,ring],{xPercent:-50,yPercent:-50});
+  const rx=gsap.quickTo(ring,"x",{duration:.45,ease:"power3"}), ry=gsap.quickTo(ring,"y",{duration:.45,ease:"power3"});
+  const dx=gsap.quickTo(dot,"x",{duration:.12,ease:"power3"}),  dy=gsap.quickTo(dot,"y",{duration:.12,ease:"power3"});
+  window.addEventListener("mousemove",e=>{ rx(e.clientX);ry(e.clientY);dx(e.clientX);dy(e.clientY); });
+  const hot=()=>ring.classList.add("hot"), cool=()=>ring.classList.remove("hot");
+  document.querySelectorAll("a,button,.car,.m-thumbs button").forEach(el=>{
+    el.addEventListener("mouseenter",hot); el.addEventListener("mouseleave",cool);
+  });
+}
+
+/* --- Magnetic buttons --- */
+document.querySelectorAll(".btn-gold,.btn-ghost,.wa-btn,.fab,.m-book,.m-enq").forEach(btn=>{
+  btn.addEventListener("mousemove",e=>{
+    const r=btn.getBoundingClientRect();
+    gsap.to(btn,{x:(e.clientX-r.left-r.width/2)*.4,y:(e.clientY-r.top-r.height/2)*.4,duration:.4,ease:"power3"});
+  });
+  btn.addEventListener("mouseleave",()=>gsap.to(btn,{x:0,y:0,duration:.6,ease:"elastic.out(1,.4)"}));
+});
+
+/* --- Car image clip-reveal on scroll --- */
+gsap.utils.toArray("#carGrid .car .img").forEach(box=>{
+  gsap.fromTo(box,{clipPath:"inset(0 0 100% 0)"},
+    {clipPath:"inset(0 0 0% 0)",duration:1.1,ease:"power3.out",
+     scrollTrigger:{trigger:box,start:"top 88%"}});
+});
+
+/* --- Nav links + section headings: gold underline sweep already via hover; add heading char lift on hero handled above --- */
+
+/* Fallback: if preloader/GSAP hiccups, never leave the page hidden */
+setTimeout(()=>{ const p=document.getElementById("preloader"); const pp=document.getElementById("plPanels");
+  if(p&&getComputedStyle(p).display!=="none"){ p.style.display="none"; if(pp)pp.style.display="none";
+    lenis&&lenis.start(); window.heroTL&&window.heroTL.play(0); }
+},4000);
 </script>
 </body>
 </html>
