@@ -6,7 +6,6 @@
 <title>Lucky Draw</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
   :root{
     --bg-deep:#0F0C29;
@@ -80,8 +79,9 @@
   .box:focus-visible .box-inner{ outline:2px solid var(--cyan); outline-offset:3px; }
   .box.locked{ cursor:default; }
 
-  .box-inner{ position:relative; width:100%; height:100%; transition:transform 0.5s cubic-bezier(.2,.9,.25,1); transform-style:preserve-3d; }
-  .box:not(.locked):hover .box-inner{ transform:translateY(-4px) scale(1.02); }
+  .box-inner{ position:relative; width:100%; height:100%; transition:transform 0.6s cubic-bezier(.2,.9,.25,1); transform-style:preserve-3d; }
+  .box.opened .box-inner{ transform:rotateY(180deg); }
+  .box:not(.opened):hover .box-inner{ transform:translateY(-4px) rotateY(0deg) scale(1.02); }
 
   .box-face{
     position:absolute; inset:0; border-radius:14px;
@@ -94,9 +94,26 @@
     box-shadow:0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .box-front .gift-icon{ font-size:26px; margin-bottom:6px; }
-  .box-front .num{ font-family:var(--font-display); font-size:11px; letter-spacing:0.08em; color:var(--text-muted); word-break:break-word; }
-  .taken-box .box-front{ opacity:0.5; border-color:rgba(95,217,122,0.35); }
-  .taken-box .box-front .num{ color:var(--green); }
+  .box-front .num{ font-family:var(--font-display); font-size:11px; letter-spacing:0.08em; color:var(--text-muted); }
+  .box-front::before{
+    content:''; position:absolute; inset:0; border-radius:14px;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.10) 50%, transparent 70%);
+    background-size:220% 220%;
+    animation:sheen 4.5s ease-in-out infinite;
+  }
+  @keyframes sheen{ 0%{ background-position:200% 0; } 100%{ background-position:-40% 0; } }
+
+  .box-back{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    transform:rotateY(180deg);
+    gap:3px;
+  }
+  .box-back .prize-icon{ font-size:22px; }
+  .box-back .prize-name{ font-size:10px; font-weight:600; line-height:1.2; color:var(--text); }
+  .box-back .claimed-by{ font-size:9px; color:var(--text-muted); margin-top:2px; }
+  .box.opened.is-tryagain .box-back .prize-name{ color:var(--slate); }
+  .box.opened:not(.is-tryagain) .box-back{ box-shadow:0 0 0 2px var(--prize-color, var(--gold)) inset; }
 
   .sidebar{ background:rgba(255,255,255,0.02); border:1px solid var(--panel-line); border-radius:20px; padding:22px; }
   .sidebar h2{ font-family:var(--font-display); font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
@@ -108,7 +125,18 @@
   .prize-row .info .count{ font-size:11px; color:var(--text-muted); margin-top:1px; }
   .prize-row .count.empty{ color:var(--slate); text-decoration:line-through; }
 
-  .screen{ max-width:400px; margin:50px auto; text-align:center; padding:0 6px; }
+  .board-footer{ margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .progress-text{ font-size:13px; color:var(--text-muted); }
+  .progress-text b{ color:var(--text); }
+  .reset-btn{
+    font-family:var(--font-body); font-weight:600; font-size:13px;
+    background:transparent; color:var(--text-muted);
+    border:1px solid var(--panel-line); border-radius:8px;
+    padding:9px 16px; cursor:pointer; transition:all 0.2s;
+  }
+  .reset-btn:hover{ color:var(--text); border-color:var(--cyan); }
+
+  .screen{ max-width:400px; margin:40px auto; text-align:center; padding:0 6px; }
   .field{ margin-bottom:14px; text-align:left; }
   .field label{ font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block; font-weight:600; }
   .field input{ width:100%; padding:13px 14px; border-radius:10px; border:1px solid var(--panel-line); background:rgba(255,255,255,0.04); color:var(--text); font-size:15px; font-family:var(--font-body); }
@@ -116,15 +144,6 @@
 
   .primary-btn{ width:100%; padding:14px; border-radius:12px; border:none; background:var(--gold); color:#1A1540; font-weight:700; font-size:15px; cursor:pointer; font-family:var(--font-body); transition:transform 0.15s; }
   .primary-btn:hover{ transform:translateY(-1px); }
-
-  .qr-card{ background:#fff; border-radius:16px; padding:16px; display:inline-block; margin:14px 0; }
-  .link-row{ display:flex; gap:8px; max-width:420px; margin:0 auto; }
-  .link-row input{ flex:1; padding:11px 12px; border-radius:10px; border:1px solid var(--panel-line); background:rgba(255,255,255,0.04); color:var(--text-muted); font-size:12px; }
-  .copy-btn{ padding:0 16px; border-radius:10px; border:1px solid var(--panel-line); background:transparent; color:var(--text); cursor:pointer; font-weight:600; font-size:13px; }
-  .copy-btn:hover{ border-color:var(--cyan); }
-
-  .waiting-spinner{ width:34px; height:34px; border-radius:50%; border:3px solid var(--panel-line); border-top-color:var(--cyan); margin:22px auto; animation:spin 1s linear infinite; }
-  @keyframes spin{ to{ transform:rotate(360deg); } }
 
   .error-text{ color:var(--danger); font-size:12px; margin-top:10px; min-height:14px; }
 
@@ -147,52 +166,40 @@
     { id:'voucher',  name:'Cash Voucher RM50',           icon:'💵', qty:3, color:'#5FD97A' },
     { id:'tryagain', name:'Try Again Later',             icon:'🍀', qty:10, color:'#8B85B8', isTryAgain:true }
   ];
+  const TOTAL_SLOTS = PRIZES.reduce((sum, p) => sum + p.qty, 0);
 
-  const params = new URLSearchParams(location.search);
-  const isHost = params.get('host') === '1';
-  let myPhone = params.get('phone') || null;
-  let game = { board:null, players:{}, started:false };
-  let currentScreen = 'loading';
-  const POLLABLE = ['waiting','pick','host'];
+  let board = [];        // shuffled slots for this round: {prizeId, claimedBy, claimedName}
+  let players = {};      // phone -> {name, pickedIndex}
+  let activePhone = null;
+  let screen = 'join';   // 'join' | 'pick' | 'result'
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
 
-  function defaultGame(){ return { board:null, players:{}, started:false }; }
-
-  async function loadGame(){
-    try{
-      const res = await window.storage.get('game', true);
-      return res && res.value ? JSON.parse(res.value) : defaultGame();
-    }catch(e){
-      return defaultGame();
+  function shuffle(arr){
+    for(let i = arr.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-  }
-
-  async function saveGame(g){
-    try{
-      await window.storage.set('game', JSON.stringify(g), true);
-    }catch(e){
-      console.error('Could not save game state', e);
-    }
+    return arr;
   }
 
   function buildBoard(){
     const pool = [];
     PRIZES.forEach(p => { for(let i = 0; i < p.qty; i++) pool.push({ prizeId:p.id, claimedBy:null, claimedName:null }); });
-    for(let i = pool.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    return pool;
+    return shuffle(pool);
   }
 
   function remainingCounts(){
     const counts = {};
     PRIZES.forEach(p => counts[p.id] = p.qty);
-    if(game.board){ game.board.forEach(slot => { if(slot.claimedBy) counts[slot.prizeId]--; }); }
+    board.forEach(slot => { if(slot.claimedBy) counts[slot.prizeId]--; });
     return counts;
+  }
+
+  function openedCount(){
+    return board.filter(s => s.claimedBy).length;
   }
 
   function poolHtml(){
@@ -207,50 +214,21 @@
       </div>`).join('');
   }
 
-  async function refresh(){
-    game = await loadGame();
-    render();
-  }
-
   function render(){
     const app = document.getElementById('app');
-    if(isHost){
-      currentScreen = 'host';
-      app.innerHTML = renderHostHTML();
-      renderQr();
-      return;
-    }
-    if(!myPhone || !game.players[myPhone]){
-      currentScreen = 'join';
-      app.innerHTML = renderJoinHTML();
-      return;
-    }
-    const me = game.players[myPhone];
-    if(me.pickedIndex !== null && me.pickedIndex !== undefined){
-      const alreadyShown = currentScreen === 'result';
-      currentScreen = 'result';
-      app.innerHTML = renderResultHTML(me);
-      if(!alreadyShown){
-        const prize = PRIZES.find(p => p.id === game.board[me.pickedIndex].prizeId);
-        if(!prize.isTryAgain) launchConfetti();
-      }
-      return;
-    }
-    if(!game.started){
-      currentScreen = 'waiting';
-      app.innerHTML = renderWaitingHTML(me);
-      return;
-    }
-    currentScreen = 'pick';
-    app.innerHTML = renderPickHTML();
+    if(screen === 'join') app.innerHTML = renderJoinHTML();
+    else if(screen === 'pick') app.innerHTML = renderPickHTML();
+    else app.innerHTML = renderResultHTML();
   }
 
   function renderJoinHTML(){
     return `
-      <div class="screen">
+      <header>
         <div class="eyebrow">Team Icebreaker</div>
-        <h1 style="font-size:32px;">Join the Draw</h1>
-        <p style="color:var(--text-muted);margin:10px 0 24px;">Enter your details to get your pick.</p>
+        <h1>LUCKY DRAW</h1>
+        <p>Key in your details to take your turn.</p>
+      </header>
+      <div class="screen">
         <div class="field">
           <label for="joinName">Your name</label>
           <input id="joinName" type="text" placeholder="e.g. Alex Tan" autocomplete="name">
@@ -259,104 +237,47 @@
           <label for="joinPhone">Phone number</label>
           <input id="joinPhone" type="tel" placeholder="e.g. 012-3456789" autocomplete="tel">
         </div>
-        <button class="primary-btn" data-action="join">Join Game →</button>
+        <button class="primary-btn" data-action="join">Join &amp; Pick a Box →</button>
         <p class="error-text" id="joinError"></p>
       </div>
-    `;
-  }
-
-  function renderWaitingHTML(me){
-    return `
-      <div class="screen">
-        <div class="eyebrow">You're in, ${escapeHtml(me.name)}!</div>
-        <h1 style="font-size:26px;">Hang tight</h1>
-        <div class="waiting-spinner"></div>
-        <p style="color:var(--text-muted);">Waiting for the host to start the draw…</p>
+      <div style="max-width:420px;margin:20px auto 0;text-align:center;">
+        <div class="progress-text"><b>${openedCount()}</b> of <b>${TOTAL_SLOTS}</b> boxes opened</div>
+        <button class="reset-btn" style="margin-top:12px;" data-action="reset-game">↻ Reset game</button>
       </div>
     `;
   }
 
   function renderPickHTML(){
-    const me = game.players[myPhone];
-    const boxes = game.board.map((slot, i) => {
+    const me = players[activePhone];
+    const boxes = board.map((slot, i) => {
       const taken = !!slot.claimedBy;
+      const prize = PRIZES.find(p => p.id === slot.prizeId);
       return `
-        <button class="box ${taken ? 'locked taken-box' : ''}" ${taken ? 'disabled' : `data-action="pick" data-index="${i}"`}>
+        <button class="box ${taken ? 'locked opened' : ''} ${taken && prize.isTryAgain ? 'is-tryagain' : ''}"
+                ${taken ? 'disabled' : `data-action="pick" data-index="${i}"`}>
           <div class="box-inner">
             <div class="box-face box-front">
-              <div class="gift-icon">${taken ? '🔒' : '🎁'}</div>
-              <div class="num">${taken ? 'TAKEN' : 'BOX ' + (i + 1)}</div>
+              <div class="gift-icon">🎁</div>
+              <div class="num">BOX ${i + 1}</div>
+            </div>
+            <div class="box-face box-back" style="--prize-color:${prize.color}">
+              <div class="prize-icon">${taken ? prize.icon : ''}</div>
+              <div class="prize-name">${taken ? prize.name : ''}</div>
+              ${taken ? `<div class="claimed-by">${escapeHtml(slot.claimedName)}</div>` : ''}
             </div>
           </div>
         </button>`;
     }).join('');
 
     return `
-      <div class="screen" style="max-width:520px;">
-        <div class="eyebrow">Hi ${escapeHtml(me.name)} — your turn!</div>
-        <h1 style="font-size:26px;">Pick a Box</h1>
-        <p style="color:var(--text-muted);margin-bottom:18px;">Tap any unclaimed box. You get one pick.</p>
-      </div>
-      <div class="grid" style="max-width:520px;margin:0 auto;">${boxes}</div>
-      <div class="sidebar" style="max-width:520px;margin:24px auto 0;">
-        <h2>Prize Pool</h2>
-        ${poolHtml()}
-      </div>
-    `;
-  }
-
-  function renderResultHTML(me){
-    const prize = PRIZES.find(p => p.id === game.board[me.pickedIndex].prizeId);
-    const isTry = !!prize.isTryAgain;
-    return `
-      <div class="screen">
-        <span style="font-size:64px;display:block;">${prize.icon}</span>
-        <h1 style="font-size:26px;margin:10px 0 4px;">${isTry ? 'So close!' : 'Congratulations!'}</h1>
-        <div style="font-size:17px;font-weight:600;color:${isTry ? 'var(--slate)' : 'var(--gold-soft)'};margin-bottom:14px;">
-          ${isTry ? prize.name : 'You won: ' + prize.name}
-        </div>
-        <p style="color:var(--text-muted);font-size:13px;">
-          ${isTry ? 'No prize this time — thanks for playing!' : 'Show this screen to the host to collect your prize.'}
-        </p>
-      </div>
-    `;
-  }
-
-  function renderHostHTML(){
-    const joinUrl = location.origin + location.pathname;
-    const playerCount = Object.keys(game.players).length;
-    const boxes = (game.board || []).map((slot, i) => {
-      const taken = !!slot.claimedBy;
-      return `
-        <div class="box ${taken ? 'locked taken-box' : ''}">
-          <div class="box-inner">
-            <div class="box-face box-front">
-              <div class="gift-icon">${taken ? '✅' : '🎁'}</div>
-              <div class="num">${taken ? escapeHtml(slot.claimedName || 'Taken') : 'BOX ' + (i + 1)}</div>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-
-    return `
       <header>
-        <div class="eyebrow">Host Display</div>
-        <h1>LUCKY DRAW</h1>
-        <p>${playerCount} player${playerCount === 1 ? '' : 's'} joined · ${game.started ? 'Draw in progress' : 'Not started yet'}</p>
+        <div class="eyebrow">Hi ${escapeHtml(me.name)} — your turn!</div>
+        <h1 style="font-size:clamp(28px,5vw,44px);">Pick a Box</h1>
+        <p>Tap any unclaimed box. You get one pick.</p>
       </header>
-      <div style="text-align:center;">
-        <div class="qr-card" id="qrCard"></div>
-        <div class="link-row">
-          <input id="joinLinkInput" readonly value="${joinUrl}">
-          <button class="copy-btn" data-action="copy-link">Copy</button>
-        </div>
-        <button class="primary-btn" style="max-width:260px;margin:18px auto 30px;" data-action="start-game">
-          ${game.started ? '↻ Reset Game' : '▶ Start Game'}
-        </button>
-      </div>
       <div class="layout">
         <div class="board">
-          <div class="grid">${boxes || '<p style="color:var(--text-muted);grid-column:1/-1;">Click "Start Game" to shuffle prizes into boxes.</p>'}</div>
+          <div class="grid">${boxes}</div>
         </div>
         <div class="sidebar">
           <h2>Prize Pool</h2>
@@ -366,73 +287,90 @@
     `;
   }
 
-  function renderQr(){
-    const card = document.getElementById('qrCard');
-    if(!card) return;
-    card.innerHTML = '';
-    if(window.QRCode){
-      new QRCode(card, {
-        text: location.origin + location.pathname,
-        width: 170, height: 170,
-        colorDark: '#1A1540', colorLight: '#ffffff'
-      });
-    } else {
-      card.innerHTML = '<p style="color:#333;font-size:12px;padding:20px;">QR library failed to load — share the link below instead.</p>';
-    }
+  function renderResultHTML(){
+    const me = players[activePhone];
+    const prize = PRIZES.find(p => p.id === board[me.pickedIndex].prizeId);
+    const isTry = !!prize.isTryAgain;
+    return `
+      <header>
+        <div class="eyebrow">${escapeHtml(me.name)}</div>
+        <h1 style="font-size:clamp(28px,5vw,44px);">${isTry ? 'So close!' : 'Congratulations!'}</h1>
+      </header>
+      <div class="screen">
+        <span style="font-size:64px;display:block;">${prize.icon}</span>
+        <div style="font-size:18px;font-weight:600;color:${isTry ? 'var(--slate)' : 'var(--gold-soft)'};margin:10px 0 14px;">
+          ${isTry ? prize.name : 'You won: ' + prize.name}
+        </div>
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:26px;">
+          ${isTry ? 'No prize this time — thanks for playing!' : 'Show this screen to the host to collect your prize.'}
+        </p>
+        <button class="primary-btn" data-action="next-player">Next Player →</button>
+      </div>
+      <div style="max-width:420px;margin:20px auto 0;">
+        <div class="sidebar">
+          <h2>Prize Pool</h2>
+          ${poolHtml()}
+        </div>
+      </div>
+    `;
   }
 
-  async function handleJoin(){
+  function handleJoin(){
     const name = document.getElementById('joinName').value.trim();
     const phone = document.getElementById('joinPhone').value.trim();
     const errorEl = document.getElementById('joinError');
+
     if(!name || !phone){ errorEl.textContent = 'Please fill in both name and phone number.'; return; }
     if(phone.replace(/\D/g, '').length < 8){ errorEl.textContent = 'Please enter a valid phone number.'; return; }
 
-    game = await loadGame();
-    if(!game.players[phone]){
-      game.players[phone] = { name, phone, joinedAt: Date.now(), pickedIndex: null };
-    } else {
-      game.players[phone].name = name;
-    }
-    await saveGame(game);
-    myPhone = phone;
-    const url = new URL(location.href);
-    url.searchParams.set('phone', phone);
-    history.replaceState({}, '', url);
-    render();
-  }
-
-  async function handlePick(index){
-    game = await loadGame();
-    const me = game.players[myPhone];
-    if(!me || me.pickedIndex !== null || !game.board || !game.board[index] || game.board[index].claimedBy){
+    if(players[phone] && players[phone].pickedIndex !== null){
+      // this phone already played - show their result instead of a new pick
+      activePhone = phone;
+      screen = 'result';
       render();
       return;
     }
-    game.board[index].claimedBy = myPhone;
-    game.board[index].claimedName = me.name;
-    me.pickedIndex = index;
-    await saveGame(game);
-    render();
-  }
 
-  async function handleStartGame(){
-    game = await loadGame();
-    if(game.started){
-      if(!confirm("Reset the game? This clears everyone's picks and reshuffles prizes.")) return;
+    if(openedCount() >= TOTAL_SLOTS){
+      errorEl.textContent = 'All prizes have been claimed — thanks for playing!';
+      return;
     }
-    game.board = buildBoard();
-    game.players = {};
-    game.started = true;
-    await saveGame(game);
+
+    players[phone] = players[phone] || { name, phone, pickedIndex: null };
+    players[phone].name = name;
+    activePhone = phone;
+    screen = 'pick';
     render();
   }
 
-  function handleCopyLink(){
-    const input = document.getElementById('joinLinkInput');
-    input.select();
-    try{ navigator.clipboard.writeText(input.value); }
-    catch(e){ document.execCommand('copy'); }
+  function handlePick(index){
+    if(board[index].claimedBy) return;
+    const me = players[activePhone];
+    if(!me || me.pickedIndex !== null) return;
+
+    board[index].claimedBy = activePhone;
+    board[index].claimedName = me.name;
+    me.pickedIndex = index;
+    screen = 'result';
+    render();
+
+    const prize = PRIZES.find(p => p.id === board[index].prizeId);
+    if(!prize.isTryAgain) launchConfetti();
+  }
+
+  function handleNextPlayer(){
+    activePhone = null;
+    screen = 'join';
+    render();
+  }
+
+  function handleResetGame(){
+    if(!confirm('Reset the board? All boxes will be re-shuffled and player records cleared.')) return;
+    board = buildBoard();
+    players = {};
+    activePhone = null;
+    screen = 'join';
+    render();
   }
 
   document.getElementById('app').addEventListener('click', (e) => {
@@ -441,8 +379,16 @@
     const action = btn.dataset.action;
     if(action === 'join') handleJoin();
     else if(action === 'pick') handlePick(parseInt(btn.dataset.index, 10));
-    else if(action === 'start-game') handleStartGame();
-    else if(action === 'copy-link') handleCopyLink();
+    else if(action === 'next-player') handleNextPlayer();
+    else if(action === 'reset-game') handleResetGame();
+  });
+
+  // allow Enter key to submit the join form
+  document.getElementById('app').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && screen === 'join'){
+      const target = e.target;
+      if(target.id === 'joinName' || target.id === 'joinPhone') handleJoin();
+    }
   });
 
   function launchConfetti(){
@@ -472,8 +418,8 @@
     sparkleField.appendChild(s);
   }
 
-  refresh();
-  setInterval(() => { if(POLLABLE.includes(currentScreen)) refresh(); }, 3000);
+  board = buildBoard();
+  render();
 </script>
 </body>
 </html>
