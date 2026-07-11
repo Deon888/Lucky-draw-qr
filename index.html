@@ -1,449 +1,668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lucky Draw</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>APEX EXOTICS — Premium Supercar Sales | Klang Valley</title>
+<meta name="description" content="Klang Valley's home for exotic supercars — Ferrari, Lamborghini, McLaren, Porsche. Book a private viewing today." />
+
+<!-- ============================================================
+     RENAME YOUR DEALERSHIP: search & replace "APEX EXOTICS"
+     WhatsApp:  012-787 1321  ->  wa.me/60127871321
+     Map:       https://maps.app.goo.gl/QktkLAH2rZbhezgS7
+     Instagram: update the href="#" in the .ig button
+     ============================================================ -->
+
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Syncopate:wght@700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#0F0C29;
-    --bg-mid:#1B1640;
-    --panel:#221C4C;
-    --panel-line:#352C6E;
-    --card-a:#4C3A9C;
-    --card-b:#2A2168;
-    --gold:#F5B942;
-    --gold-soft:#FFDE9E;
-    --cyan:#3DDBD9;
-    --pink:#FF8FD6;
-    --green:#5FD97A;
-    --slate:#8B85B8;
-    --danger:#FF8B8B;
-    --text:#F5F3FF;
-    --text-muted:#9C93C4;
-    --font-display:'Space Grotesk', 'Arial Black', sans-serif;
-    --font-body:'Inter', -apple-system, sans-serif;
+    --bg:#0a0a0c;
+    --panel:#101015;
+    --gold:#c8a04a;
+    --gold-2:#f0d488;
+    --ink:#ffffff;
+    --muted:#9a9aa6;
+    --line:rgba(255,255,255,.08);
   }
-  *{box-sizing:border-box; margin:0; padding:0;}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
   body{
-    min-height:100vh;
-    background:
-      radial-gradient(circle at 15% 10%, rgba(61,219,217,0.10), transparent 40%),
-      radial-gradient(circle at 85% 85%, rgba(245,185,66,0.10), transparent 45%),
-      linear-gradient(160deg, var(--bg-deep), var(--bg-mid));
-    font-family:var(--font-body);
-    color:var(--text);
-    overflow-x:hidden;
-    padding:28px 20px 60px;
+    background:var(--bg);color:var(--ink);
+    font-family:"Sora",system-ui,sans-serif;
+    overflow-x:hidden;line-height:1.5;
+  }
+  ::selection{background:var(--gold);color:#000}
+  .display{font-family:"Syncopate",sans-serif;letter-spacing:.06em}
+  a{color:inherit;text-decoration:none}
+  img{display:block;width:100%;height:100%;object-fit:cover}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 40px;transition:.4s;
+  }
+  nav.scrolled{background:rgba(10,10,12,.82);backdrop-filter:blur(12px);
+    padding:14px 40px;border-bottom:1px solid var(--line)}
+  .brand{font-family:"Syncopate";font-size:19px;font-weight:700;letter-spacing:.14em}
+  .brand span{color:var(--gold)}
+  .nav-links{display:flex;gap:34px;align-items:center}
+  .nav-links a{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);transition:.3s}
+  .nav-links a:hover{color:var(--gold)}
+  .wa-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    background:#25D366;color:#04210f;font-weight:700;font-size:13px;
+    padding:11px 18px;border-radius:40px;letter-spacing:.03em;transition:.3s;
+  }
+  .wa-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(37,211,102,.35)}
+  .wa-btn svg{width:17px;height:17px;fill:#04210f}
+  .menu-toggle{display:none}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;height:100vh;min-height:640px;overflow:hidden;display:flex;align-items:center}
+  .hero-bg{position:absolute;inset:0;z-index:0;transform:scale(1.15);
+    background:linear-gradient(120deg,#1a1206,#0a0a0c)}
+  .hero-bg img{opacity:.62}
+  .hero-grad{position:absolute;inset:0;z-index:1;
+    background:linear-gradient(90deg,rgba(10,10,12,.92) 0%,rgba(10,10,12,.55) 45%,rgba(10,10,12,.15) 100%)}
+  .hero-inner{position:relative;z-index:2;padding:0 40px;max-width:1000px}
+  .kicker{display:inline-block;font-size:12px;letter-spacing:.34em;text-transform:uppercase;
+    color:var(--gold);border:1px solid var(--gold);padding:8px 16px;border-radius:40px;margin-bottom:26px}
+  .hero h1{font-family:"Syncopate";font-size:clamp(34px,7vw,84px);line-height:1.02;font-weight:700;text-transform:uppercase}
+  .hero h1 .char{display:inline-block;will-change:transform}
+  .hero h1 .g{color:var(--gold)}
+  .hero p.sub{max-width:520px;margin:26px 0 34px;color:var(--muted);font-size:clamp(15px,1.5vw,18px)}
+  .hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+  .btn-gold{background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#1a1206;
+    font-weight:700;padding:15px 30px;border-radius:40px;letter-spacing:.04em;transition:.3s;font-size:14px}
+  .btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 34px rgba(200,160,74,.4)}
+  .btn-ghost{border:1px solid rgba(255,255,255,.25);color:#fff;padding:15px 30px;border-radius:40px;
+    font-size:14px;letter-spacing:.04em;transition:.3s}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+  .scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);z-index:3;
+    color:var(--muted);font-size:11px;letter-spacing:.3em;text-transform:uppercase;text-align:center}
+  .scroll-cue span{display:block;width:1px;height:38px;background:linear-gradient(var(--gold),transparent);margin:10px auto 0}
+
+  /* ---------- MARQUEE ---------- */
+  .marquee{border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:26px 0;overflow:hidden;white-space:nowrap;
+    background:linear-gradient(180deg,#20202a,#191921)}
+  .marquee-track{display:inline-flex;gap:60px;will-change:transform}
+  .marquee-track span{font-family:"Syncopate";font-size:26px;color:#8b8b9a;letter-spacing:.1em;text-transform:uppercase}
+  .marquee-track span.on{color:var(--gold-2)}
+
+  /* ---------- SECTION SHELL ---------- */
+  section.block{padding:120px 40px;position:relative}
+  .sec-head{max-width:640px;margin-bottom:60px}
+  .sec-head .eyebrow{color:var(--gold);font-size:12px;letter-spacing:.3em;text-transform:uppercase}
+  .sec-head h2{font-family:"Syncopate";font-size:clamp(26px,4vw,44px);margin-top:16px;text-transform:uppercase;line-height:1.1}
+  .sec-head p{color:var(--muted);margin-top:18px;font-size:16px}
+
+  /* ---------- COLLECTION GRID ---------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .car{position:relative;border-radius:16px;overflow:hidden;background:var(--panel);
+    border:1px solid var(--line);aspect-ratio:4/3.4;cursor:pointer}
+  .car .ph{position:absolute;inset:0;background:linear-gradient(135deg,#1c1c22,#0d0d11)}
+  .car .img{position:absolute;inset:0;overflow:hidden}
+  .car .img img{transition:transform .9s cubic-bezier(.16,.84,.44,1)}
+  .car:hover .img img{transform:scale(1.09)}
+  .car .veil{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,10,.95) 8%,rgba(8,8,10,.15) 60%,transparent)}
+  .car .meta{position:absolute;left:22px;right:22px;bottom:20px;z-index:2}
+  .car .badge{display:inline-block;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--gold);border:1px solid var(--gold);padding:5px 11px;border-radius:30px;margin-bottom:12px}
+  .car h3{font-size:22px;font-weight:700}
+  .car .specs{display:flex;gap:16px;margin-top:10px;color:var(--muted);font-size:12.5px}
+  .car .specs b{color:#fff;font-weight:600}
+  .car .price{position:absolute;top:18px;right:18px;z-index:2;background:rgba(10,10,12,.7);
+    backdrop-filter:blur(6px);border:1px solid var(--line);padding:8px 14px;border-radius:30px;
+    font-weight:700;font-size:13px;color:var(--gold-2)}
+
+  /* ---------- STATS ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:70px 40px}
+  .stat{text-align:center}
+  .stat .num{font-family:"Syncopate";font-size:clamp(34px,5vw,58px);color:var(--gold)}
+  .stat .lbl{color:var(--muted);font-size:13px;letter-spacing:.16em;text-transform:uppercase;margin-top:8px}
+
+  /* ---------- PARALLAX BANNER ---------- */
+  .banner{position:relative;height:60vh;min-height:420px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .banner .pbg{position:absolute;inset:-15% 0;z-index:0;background:#111}
+  .banner .pbg img{opacity:.5}
+  .banner .pveil{position:absolute;inset:0;background:rgba(8,8,10,.55);z-index:1}
+  .banner .btxt{position:relative;z-index:2;text-align:center;padding:0 30px}
+  .banner .btxt h2{font-family:"Syncopate";font-size:clamp(24px,4.5vw,50px);text-transform:uppercase;line-height:1.12}
+  .banner .btxt p{color:var(--muted);margin-top:18px;font-size:16px}
+
+  /* ---------- WHY / SERVICES ---------- */
+  .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:26px}
+  .fcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:38px 30px;transition:.4s}
+  .fcard:hover{border-color:var(--gold);transform:translateY(-6px)}
+  .fcard .ic{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:rgba(200,160,74,.12);color:var(--gold);margin-bottom:22px}
+  .fcard .ic svg{width:26px;height:26px;stroke:var(--gold);fill:none;stroke-width:1.6}
+  .fcard h3{font-size:20px;margin-bottom:12px}
+  .fcard p{color:var(--muted);font-size:14.5px}
+
+  /* ---------- CONTACT ---------- */
+  .contact{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:stretch}
+  .contact .c-copy h2{font-family:"Syncopate";font-size:clamp(26px,4vw,44px);text-transform:uppercase;line-height:1.1}
+  .contact .c-copy p{color:var(--muted);margin:20px 0 30px;font-size:16px;max-width:460px}
+  .c-actions{display:flex;flex-direction:column;gap:14px;max-width:420px}
+  .c-row{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);
+    border-radius:14px;padding:18px 22px;transition:.3s}
+  .c-row:hover{border-color:var(--gold);transform:translateX(6px)}
+  .c-row .ci{width:44px;height:44px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center}
+  .c-row .ci svg{width:22px;height:22px}
+  .c-row .t small{display:block;color:var(--muted);font-size:11px;letter-spacing:.18em;text-transform:uppercase}
+  .c-row .t b{font-size:16px;font-weight:600}
+  .ci.wa{background:#25D366}.ci.wa svg{fill:#04210f}
+  .ci.map{background:rgba(200,160,74,.15)}.ci.map svg{stroke:var(--gold);fill:none;stroke-width:1.6}
+  .ci.ig{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)}.ci.ig svg{stroke:#fff;fill:none;stroke-width:1.7}
+  .map-card{border-radius:18px;overflow:hidden;border:1px solid var(--line);position:relative;
+    min-height:420px;background:var(--panel);display:flex}
+  .map-card iframe{flex:1;width:100%;height:100%;border:0;min-height:420px;
+    filter:contrast(1.05) saturate(1.05) brightness(.98)}
+  .map-open{position:absolute;bottom:16px;left:16px;right:16px;background:rgba(10,10,12,.88);
+    backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:14px 18px;
+    display:flex;align-items:center;justify-content:space-between;font-size:13px;
+    transition:.3s;text-decoration:none}
+  .map-open:hover{border-color:var(--gold);background:rgba(10,10,12,.95)}
+  .map-open span{color:var(--muted)}
+  .map-open b{color:var(--gold)}
+  .map-pin{position:absolute;top:16px;left:16px;z-index:3;background:rgba(10,10,12,.85);
+    backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:30px;padding:8px 14px;
+    display:flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.06em}
+  .map-pin svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.7}
+  .map-pin b{color:#fff;font-weight:600}
+
+  /* ---------- FOOTER ---------- */
+  footer{border-top:1px solid var(--line);padding:50px 40px 40px;display:flex;
+    justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+  footer .brand{font-size:16px}
+  footer .socials{display:flex;gap:12px}
+  footer .socials a{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;transition:.3s}
+  footer .socials a:hover{border-color:var(--gold);background:rgba(200,160,74,.1)}
+  footer .socials svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:1.7}
+  footer .socials a:hover svg{stroke:var(--gold)}
+  footer .fine{color:#5a5a66;font-size:12px;letter-spacing:.05em}
+
+  /* ---------- FLOATING WHATSAPP ---------- */
+  .fab{position:fixed;right:22px;bottom:22px;z-index:60;width:60px;height:60px;border-radius:50%;
+    background:#25D366;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 30px rgba(37,211,102,.45);transition:.3s}
+  .fab:hover{transform:scale(1.08)}
+  .fab svg{width:30px;height:30px;fill:#fff}
+  .fab::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #25D366;
+    animation:ring 2s infinite}
+  @keyframes ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.8);opacity:0}}
+
+  /* preview eye hint on cards */
+  .car .eye{position:absolute;top:18px;left:18px;z-index:2;background:rgba(10,10,12,.7);
+    backdrop-filter:blur(6px);border:1px solid var(--line);padding:7px 12px;border-radius:30px;
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#fff;opacity:0;transform:translateY(-6px);transition:.3s}
+  .car:hover .eye{opacity:1;transform:translateY(0)}
+
+  /* ---------- PREVIEW MODAL ---------- */
+  .modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal.open{display:flex}
+  .modal-bg{position:absolute;inset:0;background:rgba(4,4,6,.86);backdrop-filter:blur(8px);opacity:0}
+  .modal-card{position:relative;z-index:2;width:min(980px,100%);max-height:92vh;overflow:hidden;
+    background:var(--panel);border:1px solid var(--line);border-radius:20px;display:grid;
+    grid-template-columns:1.25fr .85fr;opacity:0}
+  .m-gallery{position:relative;background:#0d0d11;min-height:340px;display:flex;flex-direction:column}
+  .m-main{position:relative;flex:1;overflow:hidden;background:linear-gradient(135deg,#1c1c22,#0d0d11)}
+  .m-main img{position:absolute;inset:0;transition:opacity .4s}
+  .m-thumbs{display:flex;gap:10px;padding:12px}
+  .m-thumbs button{flex:1;height:64px;border-radius:10px;overflow:hidden;border:2px solid transparent;
+    background:#1c1c22;cursor:pointer;padding:0;transition:.3s}
+  .m-thumbs button.active{border-color:var(--gold)}
+  .m-thumbs img{width:100%;height:100%;object-fit:cover}
+  .m-info{padding:34px 32px;display:flex;flex-direction:column}
+  .m-info .badge{align-self:flex-start;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--gold);border:1px solid var(--gold);padding:5px 12px;border-radius:30px;margin-bottom:16px}
+  .m-info h3{font-family:"Syncopate";font-size:24px;line-height:1.15;text-transform:uppercase}
+  .m-price{color:var(--gold-2);font-size:22px;font-weight:700;margin:14px 0 22px}
+  .m-specs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px}
+  .m-specs .s{background:#15151b;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .m-specs small{display:block;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .m-specs b{font-size:16px;font-weight:600}
+  .m-actions{margin-top:auto;display:flex;flex-direction:column;gap:12px}
+  .m-book{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,var(--gold-2),var(--gold));
+    color:#1a1206;font-weight:700;padding:16px;border-radius:40px;font-size:15px;letter-spacing:.03em;transition:.3s}
+  .m-book:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(200,160,74,.4)}
+  .m-book svg{width:19px;height:19px;fill:#1a1206}
+  .m-enq{display:flex;align-items:center;justify-content:center;gap:10px;background:#25D366;color:#04210f;
+    font-weight:700;padding:16px;border-radius:40px;font-size:15px;transition:.3s}
+  .m-enq:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(37,211,102,.35)}
+  .m-enq svg{width:19px;height:19px;fill:#04210f}
+  .m-close{position:absolute;top:14px;right:14px;z-index:4;width:42px;height:42px;border-radius:50%;
+    background:rgba(10,10,12,.75);border:1px solid var(--line);color:#fff;font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:.3s}
+  .m-close:hover{border-color:var(--gold);color:var(--gold);transform:rotate(90deg)}
+  @media(max-width:760px){
+    .modal-card{grid-template-columns:1fr;max-height:94vh;overflow-y:auto}
+    .m-gallery{min-height:240px}
   }
 
-  .sparkle-field{position:fixed; inset:0; pointer-events:none; z-index:0;}
-  .sparkle{
-    position:absolute; width:3px; height:3px; border-radius:50%;
-    background:var(--gold-soft); opacity:0.5;
-    animation:drift 8s ease-in-out infinite;
+  .reveal{opacity:0}
+
+  @media(max-width:900px){
+    .grid,.feat{grid-template-columns:1fr 1fr}
+    .stats{grid-template-columns:1fr 1fr;gap:40px}
+    .contact{grid-template-columns:1fr}
+    .nav-links{display:none}
+    nav,section.block{padding-left:22px;padding-right:22px}
   }
-  @keyframes drift{
-    0%,100%{ transform:translateY(0) scale(1); opacity:0.2; }
-    50%{ transform:translateY(-22px) scale(1.6); opacity:0.7; }
+  @media(max-width:600px){
+    .grid,.feat{grid-template-columns:1fr}
+    .hero-inner{padding:0 22px}
   }
-
-  .stage{ position:relative; z-index:1; max-width:1120px; margin:0 auto; }
-
-  header{ text-align:center; margin-bottom:26px; }
-  .eyebrow{
-    font-family:var(--font-body); font-weight:600; letter-spacing:0.24em;
-    font-size:12px; text-transform:uppercase; color:var(--cyan);
-    margin-bottom:10px;
-  }
-  h1{
-    font-family:var(--font-display); font-weight:700;
-    font-size:clamp(34px, 6vw, 58px); line-height:1;
-    background:linear-gradient(100deg, var(--gold-soft), var(--gold) 45%, #fff 55%, var(--gold) 70%);
-    background-size:220% auto;
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation:shine 5s linear infinite;
-  }
-  @keyframes shine{ to{ background-position:-220% center; } }
-  header p{ margin-top:10px; color:var(--text-muted); font-size:14px; }
-
-  .layout{ display:grid; grid-template-columns:1fr 300px; gap:28px; align-items:start; }
-  @media (max-width:860px){ .layout{ grid-template-columns:1fr; } }
-
-  .board{ background:rgba(255,255,255,0.02); border:1px solid var(--panel-line); border-radius:20px; padding:26px; }
-  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:14px; }
-
-  .box{ all:unset; cursor:pointer; aspect-ratio:3/4; perspective:900px; border-radius:14px; }
-  .box:focus-visible .box-inner{ outline:2px solid var(--cyan); outline-offset:3px; }
-  .box.locked{ cursor:default; }
-
-  .box-inner{ position:relative; width:100%; height:100%; transition:transform 0.6s cubic-bezier(.2,.9,.25,1); transform-style:preserve-3d; }
-  .box.opened .box-inner{ transform:rotateY(180deg); }
-  .box:not(.opened):hover .box-inner{ transform:translateY(-4px) rotateY(0deg) scale(1.02); }
-
-  .box-face{
-    position:absolute; inset:0; border-radius:14px;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    backface-visibility:hidden; padding:6px; text-align:center;
-  }
-  .box-front{
-    background:linear-gradient(150deg, var(--card-a), var(--card-b));
-    border:1px solid rgba(255,255,255,0.10);
-    box-shadow:0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
-  }
-  .box-front .gift-icon{ font-size:26px; margin-bottom:6px; }
-  .box-front .num{ font-family:var(--font-display); font-size:11px; letter-spacing:0.08em; color:var(--text-muted); }
-  .box-front::before{
-    content:''; position:absolute; inset:0; border-radius:14px;
-    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.10) 50%, transparent 70%);
-    background-size:220% 220%;
-    animation:sheen 4.5s ease-in-out infinite;
-  }
-  @keyframes sheen{ 0%{ background-position:200% 0; } 100%{ background-position:-40% 0; } }
-
-  .box-back{
-    background:var(--panel);
-    border:1px solid var(--panel-line);
-    transform:rotateY(180deg);
-    gap:3px;
-  }
-  .box-back .prize-icon{ font-size:22px; }
-  .box-back .prize-name{ font-size:10px; font-weight:600; line-height:1.2; color:var(--text); }
-  .box-back .claimed-by{ font-size:9px; color:var(--text-muted); margin-top:2px; }
-  .box.opened.is-tryagain .box-back .prize-name{ color:var(--slate); }
-  .box.opened:not(.is-tryagain) .box-back{ box-shadow:0 0 0 2px var(--prize-color, var(--gold)) inset; }
-
-  .sidebar{ background:rgba(255,255,255,0.02); border:1px solid var(--panel-line); border-radius:20px; padding:22px; }
-  .sidebar h2{ font-family:var(--font-display); font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
-  .prize-row{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--panel-line); }
-  .prize-row:last-child{ border-bottom:none; }
-  .prize-row .swatch{ width:32px; height:32px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; background:rgba(255,255,255,0.06); }
-  .prize-row .info{ flex:1; min-width:0; }
-  .prize-row .info .name{ font-size:12px; font-weight:600; color:var(--text); }
-  .prize-row .info .count{ font-size:11px; color:var(--text-muted); margin-top:1px; }
-  .prize-row .count.empty{ color:var(--slate); text-decoration:line-through; }
-
-  .board-footer{ margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
-  .progress-text{ font-size:13px; color:var(--text-muted); }
-  .progress-text b{ color:var(--text); }
-  .ghost-btn{
-    font-family:var(--font-body); font-weight:600; font-size:13px;
-    background:transparent; color:var(--text-muted);
-    border:1px solid var(--panel-line); border-radius:8px;
-    padding:9px 16px; cursor:pointer; transition:all 0.2s;
-  }
-  .ghost-btn:hover{ color:var(--text); border-color:var(--cyan); }
-
-  .screen{ max-width:400px; margin:20px auto; text-align:center; padding:0 6px; }
-  .field{ margin-bottom:14px; text-align:left; }
-  .field label{ font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block; font-weight:600; }
-  .field input{ width:100%; padding:13px 14px; border-radius:10px; border:1px solid var(--panel-line); background:rgba(255,255,255,0.04); color:var(--text); font-size:15px; font-family:var(--font-body); }
-  .field input:focus{ outline:2px solid var(--cyan); border-color:transparent; }
-
-  .primary-btn{ width:100%; padding:14px; border-radius:12px; border:none; background:var(--gold); color:#1A1540; font-weight:700; font-size:15px; cursor:pointer; font-family:var(--font-body); transition:transform 0.15s; }
-  .primary-btn:hover{ transform:translateY(-1px); }
-
-  .error-text{ color:var(--danger); font-size:12px; margin-top:10px; min-height:14px; }
-
-  .winners-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--panel-line); font-size:12px; }
-  .winners-row:last-child{ border-bottom:none; }
-  .winners-row .w-icon{ font-size:16px; }
-  .winners-row .w-info{ flex:1; min-width:0; }
-  .winners-row .w-info .w-name{ font-weight:600; color:var(--text); }
-  .winners-row .w-info .w-meta{ color:var(--text-muted); font-size:11px; }
-
-  .confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:60; overflow:hidden; }
-  .confetti-piece{ position:absolute; top:-20px; width:8px; height:14px; opacity:0.95; animation:fall linear forwards; }
-  @keyframes fall{ to{ transform:translateY(110vh) rotate(540deg); opacity:0.3; } }
 </style>
 </head>
 <body>
 
-<div class="sparkle-field" id="sparkleField"></div>
-<div class="stage" id="app"></div>
-<div class="confetti-layer" id="confettiLayer"></div>
+<!-- NAV -->
+<nav id="nav">
+  <div class="brand">APEX<span>·</span>EXOTICS</div>
+  <div class="nav-links">
+    <a href="#collection">Collection</a>
+    <a href="#why">Why Us</a>
+    <a href="#visit">Visit</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a class="wa-btn" href="https://wa.me/60127871321?text=Hi%20APEX%20EXOTICS%2C%20I%27d%20like%20to%20enquire%20about%20a%20car." target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    WhatsApp
+  </a>
+</nav>
 
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg" id="heroBg">
+    <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=80" alt="Supercar" onerror="this.style.display='none'"/>
+  </div>
+  <div class="hero-grad"></div>
+  <div class="hero-inner">
+    <span class="kicker" id="kicker">Klang Valley · Est. 2015</span>
+    <h1 id="heroTitle">The Art of <span class="g">Exotic</span> Speed</h1>
+    <p class="sub" id="heroSub">Ferrari. Lamborghini. McLaren. Porsche. Hand-selected supercars,
+      fully inspected and delivered across the Klang Valley. Your private viewing awaits.</p>
+    <div class="hero-cta" id="heroCta">
+      <a class="btn-gold" href="#collection">View the Collection</a>
+      <a class="btn-ghost" href="https://wa.me/60127871321?text=Hi%20APEX%20EXOTICS%2C%20I%27d%20like%20to%20book%20a%20private%20viewing." target="_blank" rel="noopener">Book a Viewing</a>
+    </div>
+  </div>
+  <div class="scroll-cue">Scroll<span></span></div>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-track" id="marquee">
+    <span>Ferrari</span><span class="on">◆</span><span>Lamborghini</span><span class="on">◆</span>
+    <span>McLaren</span><span class="on">◆</span><span>Porsche</span><span class="on">◆</span>
+    <span>Aston Martin</span><span class="on">◆</span><span>Bentley</span><span class="on">◆</span>
+    <span>Ferrari</span><span class="on">◆</span><span>Lamborghini</span><span class="on">◆</span>
+    <span>McLaren</span><span class="on">◆</span><span>Porsche</span><span class="on">◆</span>
+    <span>Aston Martin</span><span class="on">◆</span><span>Bentley</span><span class="on">◆</span>
+  </div>
+</div>
+
+<!-- COLLECTION -->
+<section class="block" id="collection">
+  <div class="sec-head reveal">
+    <div class="eyebrow">The Collection</div>
+    <h2>Curated Supercars,<br>Ready to Drive</h2>
+    <p>Every car in our showroom is fully inspected, documented and detailed. Prices are indicative — enquire on WhatsApp for the latest availability.</p>
+  </div>
+  <div class="grid" id="carGrid">
+    <!-- cards injected -->
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="num" data-count="480">0</div><div class="lbl">Cars Delivered</div></div>
+  <div class="stat"><div class="num" data-count="12">0</div><div class="lbl">Marques</div></div>
+  <div class="stat"><div class="num" data-count="10">0</div><div class="lbl">Years in KV</div></div>
+  <div class="stat"><div class="num" data-count="98" data-suffix="%">0</div><div class="lbl">Client Referrals</div></div>
+</div>
+
+<!-- PARALLAX BANNER -->
+<section class="banner">
+  <div class="pbg" id="pbg">
+    <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1920&q=80" alt="Lamborghini" onerror="this.style.display='none'"/>
+  </div>
+  <div class="pveil"></div>
+  <div class="btxt reveal">
+    <h2>Own the Machine<br>You've Always Wanted</h2>
+    <p>Trade-in, financing and nationwide delivery arranged in-house.</p>
+  </div>
+</section>
+
+<!-- WHY US -->
+<section class="block" id="why">
+  <div class="sec-head reveal">
+    <div class="eyebrow">Why Apex</div>
+    <h2>A Showroom Built<br>on Trust</h2>
+  </div>
+  <div class="feat">
+    <div class="fcard reveal">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg></div>
+      <h3>Fully Inspected</h3>
+      <p>Every unit passes a 200-point mechanical and cosmetic inspection before it reaches the floor.</p>
+    </div>
+    <div class="fcard reveal">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M6 7V5a2 2 0 012-2h8a2 2 0 012 2v2"/><rect x="3" y="7" width="18" height="13" rx="2"/></svg></div>
+      <h3>Financing & Trade-In</h3>
+      <p>Competitive financing packages and fair trade-in valuations handled entirely in-house.</p>
+    </div>
+    <div class="fcard reveal">
+      <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 2l2.5 6.5L21 9l-5 4 1.5 7L12 16l-5.5 4L8 13 3 9l6.5-.5z"/></svg></div>
+      <h3>Concierge Delivery</h3>
+      <p>Private viewings, doorstep delivery and after-sales care across the entire Klang Valley.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT / VISIT -->
+<section class="block" id="contact">
+  <div class="contact">
+    <div class="c-copy reveal">
+      <h2 id="visit">Visit the<br>Showroom</h2>
+      <p>Drop us a message on WhatsApp or come see the collection in person. We're open daily by appointment.</p>
+      <div class="c-actions">
+        <a class="c-row" href="https://wa.me/60127871321?text=Hi%20APEX%20EXOTICS%2C%20I%27d%20like%20to%20enquire." target="_blank" rel="noopener">
+          <div class="ci wa"><svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg></div>
+          <div class="t"><small>WhatsApp — tap to chat</small><b>012-787 1321</b></div>
+        </a>
+        <a class="c-row" href="https://maps.app.goo.gl/QktkLAH2rZbhezgS7" target="_blank" rel="noopener">
+          <div class="ci map"><svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></div>
+          <div class="t"><small>Showroom — open in Maps</small><b>Kuala Lumpur (KLCC)</b></div>
+        </a>
+        <a class="c-row ig" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+          <div class="ci ig"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.3" cy="6.7" r="1.1" fill="#fff" stroke="none"/></svg></div>
+          <div class="t"><small>Instagram — coming soon</small><b>@apexexotics</b></div>
+        </a>
+      </div>
+    </div>
+    <div class="map-card reveal">
+      <iframe title="APEX EXOTICS showroom location"
+        src="https://www.google.com/maps?q=3.1572757,101.7122335&z=16&output=embed"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+        allowfullscreen></iframe>
+      <div class="map-pin">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <b>APEX EXOTICS Showroom</b>
+      </div>
+      <a class="map-open" href="https://maps.app.goo.gl/QktkLAH2rZbhezgS7" target="_blank" rel="noopener">
+        <span>Get directions to the showroom</span><b>Open in Google Maps ↗</b>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="brand">APEX<span style="color:var(--gold)">·</span>EXOTICS</div>
+  <div class="socials">
+    <a href="https://wa.me/60127871321" target="_blank" rel="noopener" aria-label="WhatsApp">
+      <svg viewBox="0 0 24 24" fill="#fff" stroke="none"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+    </a>
+    <a href="#" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.5"/><circle cx="17.3" cy="6.7" r="1" fill="#fff" stroke="none"/></svg>
+    </a>
+    <a href="https://maps.app.goo.gl/QktkLAH2rZbhezgS7" target="_blank" rel="noopener" aria-label="Location">
+      <svg viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+    </a>
+  </div>
+  <div class="fine">© 2026 APEX EXOTICS · Klang Valley · All rights reserved</div>
+</footer>
+
+<!-- FLOATING WHATSAPP -->
+<a class="fab" href="https://wa.me/60127871321?text=Hi%20APEX%20EXOTICS%2C%20I%27d%20like%20to%20enquire%20about%20a%20car." target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+</a>
+
+<!-- PREVIEW MODAL -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modal-bg" id="modalBg"></div>
+  <div class="modal-card" id="modalCard">
+    <button class="m-close" id="modalClose" aria-label="Close">✕</button>
+    <div class="m-gallery">
+      <div class="m-main" id="mMain"><img id="mMainImg" src="" alt="" onerror="this.style.display='none'"/></div>
+      <div class="m-thumbs" id="mThumbs"></div>
+    </div>
+    <div class="m-info">
+      <span class="badge" id="mBadge"></span>
+      <h3 id="mName"></h3>
+      <div class="m-price" id="mPrice"></div>
+      <div class="m-specs" id="mSpecs"></div>
+      <div class="m-actions">
+        <a class="m-book" id="mBook" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M7 2v3M17 2v3M3 8h18M5 5h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" fill="none" stroke="#1a1206" stroke-width="1.7"/></svg>
+          Book Test Drive Now
+        </a>
+        <a class="m-enq" id="mEnq" href="#" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163a11.867 11.867 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.817 11.817 0 018.413 3.488 11.824 11.824 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884a9.86 9.86 0 001.51 5.26l-.999 3.648 3.978-1.607zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.767.967-.94 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+          Enquire on WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
-  const PRIZES = [
-    { id:'earphone', name:'Xiaomi Earphone AirPlus 5', icon:'🎧', qty:5, color:'#3DDBD9' },
-    { id:'band',     name:'Xiaomi Band Watch 5',        icon:'⌚', qty:1, color:'#FF8FD6' },
-    { id:'laptop',   name:'Honor Madbook 3',             icon:'💻', qty:1, color:'#F5B942' },
-    { id:'voucher',  name:'Cash Voucher RM50',           icon:'💵', qty:3, color:'#5FD97A' },
-    { id:'tryagain', name:'Try Again Later',             icon:'🍀', qty:10, color:'#8B85B8', isTryAgain:true }
-  ];
-  const TOTAL_SLOTS = PRIZES.reduce((sum, p) => sum + p.qty, 0);
+gsap.registerPlugin(ScrollTrigger);
 
-  let board = [];         // {prizeId, claimedBy, claimedName, claimedPhone}
-  let winners = [];       // {name, phone, prizeId, boxIndex}
-  let pendingIndex = null;
-  let screen = 'pick';    // 'pick' | 'claim' | 'result' | 'winners'
+/* ---------- Image pool (all verified to load) ---------- */
+const U = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1400&q=80`;
+const P = {
+  porscheY:"1503376780353-7e6692767b70", lambo:"1544636331-e26879cd4d9b",
+  ferrari:"1592198084033-aade902d1aae",  mclaren:"1621135802920-133df287f89c",
+  aventador:"1583121274602-3e2820c69888", black:"1544829099-b9a0c07fad1a",
+  porsche:"1614162692292-7ac56d7f7f1e",  red:"1618843479313-40f8afb4b4d8",
+  orange:"1552519507-da3b142c6e3d",      silver:"1494976388531-d1058494cdd8",
+  porscheB:"1580273916550-e323be2ae537", road:"1503736334956-4c8f8e92946d",
+};
 
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
+/* ---------- Inventory data (with preview galleries) ---------- */
+const CARS = [
+  { name:"Ferrari 488 GTB",       badge:"Ferrari",     price:"RM 998,000", hp:"661 hp", top:"330 km/h", yr:"2019", km:"18,000 km",
+    gallery:[P.ferrari,P.red,P.orange] },
+  { name:"Lamborghini Huracán",   badge:"Lamborghini", price:"RM 1.15M",   hp:"631 hp", top:"325 km/h", yr:"2020", km:"12,400 km",
+    gallery:[P.lambo,P.aventador,P.black] },
+  { name:"McLaren 720S",          badge:"McLaren",     price:"RM 1.35M",   hp:"710 hp", top:"341 km/h", yr:"2021", km:"9,800 km",
+    gallery:[P.mclaren,P.orange,P.black] },
+  { name:"Porsche 911 Turbo S",   badge:"Porsche",     price:"RM 1.28M",   hp:"640 hp", top:"330 km/h", yr:"2022", km:"7,200 km",
+    gallery:[P.porsche,P.porscheB,P.porscheY] },
+  { name:"Lamborghini Aventador", badge:"Lamborghini", price:"RM 2.4M",    hp:"769 hp", top:"350 km/h", yr:"2021", km:"6,500 km",
+    gallery:[P.aventador,P.lambo,P.black] },
+  { name:"Audi R8 V10 Performance",badge:"Audi",       price:"RM 890,000", hp:"612 hp", top:"331 km/h", yr:"2020", km:"15,300 km",
+    gallery:[P.black,P.silver,P.road] },
+  { name:"Aston Martin DB11",     badge:"Aston Martin",price:"RM 1.05M",   hp:"630 hp", top:"334 km/h", yr:"2020", km:"14,100 km",
+    gallery:[P.red,P.ferrari,P.orange] },
+  { name:"Mercedes-AMG GT R",     badge:"Mercedes-AMG",price:"RM 1.12M",   hp:"577 hp", top:"318 km/h", yr:"2021", km:"11,600 km",
+    gallery:[P.silver,P.orange,P.road] },
+  { name:"Porsche 911 GT3",       badge:"Porsche",     price:"RM 1.42M",   hp:"503 hp", top:"318 km/h", yr:"2022", km:"5,400 km",
+    gallery:[P.porscheB,P.porscheY,P.porsche] },
+  { name:"Nissan GT-R Nismo",     badge:"Nissan",      price:"RM 780,000", hp:"600 hp", top:"315 km/h", yr:"2021", km:"16,800 km",
+    gallery:[P.road,P.black,P.silver] },
+];
 
-  function shuffle(arr){
-    for(let i = arr.length - 1; i > 0; i--){
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-  }
+const grid = document.getElementById("carGrid");
+grid.innerHTML = CARS.map((c,i)=>`
+  <article class="car reveal" data-i="${i}">
+    <div class="ph"></div>
+    <div class="img"><img src="${U(c.gallery[0])}" alt="${c.name}" loading="lazy" onerror="this.style.display='none'"/></div>
+    <div class="veil"></div>
+    <div class="price">${c.price}</div>
+    <div class="eye">👁 Preview</div>
+    <div class="meta">
+      <span class="badge">${c.badge}</span>
+      <h3>${c.name}</h3>
+      <div class="specs"><span><b>${c.hp}</b></span><span><b>${c.yr}</b></span><span><b>${c.km}</b></span></div>
+    </div>
+  </article>`).join("");
 
-  function buildBoard(){
-    const pool = [];
-    PRIZES.forEach(p => { for(let i = 0; i < p.qty; i++) pool.push({ prizeId:p.id, claimedBy:null, claimedName:null, claimedPhone:null }); });
-    return shuffle(pool);
-  }
+/* ---------- NAV state ---------- */
+const nav=document.getElementById("nav");
+ScrollTrigger.create({ start:"80 top", onUpdate:s=>nav.classList.toggle("scrolled", s.progress>0 || window.scrollY>80) });
+window.addEventListener("scroll",()=>nav.classList.toggle("scrolled",window.scrollY>60));
 
-  function remainingCounts(){
-    const counts = {};
-    PRIZES.forEach(p => counts[p.id] = p.qty);
-    board.forEach(slot => { if(slot.claimedBy) counts[slot.prizeId]--; });
-    return counts;
-  }
-
-  function openedCount(){
-    return board.filter(s => s.claimedBy).length;
-  }
-
-  function poolHtml(){
-    const remaining = remainingCounts();
-    return PRIZES.map(p => `
-      <div class="prize-row">
-        <div class="swatch">${p.icon}</div>
-        <div class="info">
-          <div class="name">${p.name}</div>
-          <div class="count ${remaining[p.id] === 0 ? 'empty' : ''}">${remaining[p.id]} of ${p.qty} left</div>
-        </div>
-      </div>`).join('');
-  }
-
-  function render(){
-    const app = document.getElementById('app');
-    if(screen === 'pick') app.innerHTML = renderPickHTML();
-    else if(screen === 'claim') app.innerHTML = renderClaimHTML();
-    else if(screen === 'winners') app.innerHTML = renderWinnersHTML();
-    else app.innerHTML = renderResultHTML();
-  }
-
-  function renderPickHTML(){
-    const boxes = board.map((slot, i) => {
-      const taken = !!slot.claimedBy;
-      const prize = PRIZES.find(p => p.id === slot.prizeId);
-      return `
-        <button class="box ${taken ? 'locked opened' : ''} ${taken && prize.isTryAgain ? 'is-tryagain' : ''}"
-                ${taken ? 'disabled' : `data-action="pick" data-index="${i}"`}>
-          <div class="box-inner">
-            <div class="box-face box-front">
-              <div class="gift-icon">🎁</div>
-              <div class="num">BOX ${i + 1}</div>
-            </div>
-            <div class="box-face box-back" style="--prize-color:${prize.color}">
-              <div class="prize-icon">${taken ? prize.icon : ''}</div>
-              <div class="prize-name">${taken ? prize.name : ''}</div>
-              ${taken && slot.claimedName ? `<div class="claimed-by">${escapeHtml(slot.claimedName)}</div>` : ''}
-            </div>
-          </div>
-        </button>`;
-    }).join('');
-
-    return `
-      <header>
-        <div class="eyebrow">Team Icebreaker</div>
-        <h1>LUCKY DRAW</h1>
-        <p>Tap any box to take your turn.</p>
-      </header>
-      <div class="layout">
-        <div class="board">
-          <div class="grid">${boxes}</div>
-          <div class="board-footer">
-            <div class="progress-text"><b>${openedCount()}</b> of <b>${TOTAL_SLOTS}</b> boxes opened</div>
-            <div style="display:flex; gap:8px;">
-              <button class="ghost-btn" data-action="show-winners">📋 Winners (${winners.length})</button>
-              <button class="ghost-btn" data-action="reset-game">↻ Reset game</button>
-            </div>
-          </div>
-        </div>
-        <div class="sidebar">
-          <h2>Prize Pool</h2>
-          ${poolHtml()}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderClaimHTML(){
-    const prize = PRIZES.find(p => p.id === board[pendingIndex].prizeId);
-    return `
-      <header>
-        <div class="eyebrow">Box ${pendingIndex + 1}</div>
-        <h1 style="font-size:clamp(28px,5vw,44px);">You Won!</h1>
-      </header>
-      <div class="screen">
-        <span style="font-size:56px;display:block;">${prize.icon}</span>
-        <div style="font-size:18px;font-weight:600;color:var(--gold-soft);margin:10px 0 20px;">${prize.name}</div>
-        <p style="color:var(--text-muted);font-size:13px;margin-bottom:18px;">Enter your details to claim this prize.</p>
-        <div class="field">
-          <label for="claimName">Your name</label>
-          <input id="claimName" type="text" placeholder="e.g. Alex Tan" autocomplete="name">
-        </div>
-        <div class="field">
-          <label for="claimPhone">Phone number</label>
-          <input id="claimPhone" type="tel" placeholder="e.g. 012-3456789" autocomplete="tel">
-        </div>
-        <button class="primary-btn" data-action="submit-claim">Submit &amp; Claim →</button>
-        <p class="error-text" id="claimError"></p>
-      </div>
-    `;
-  }
-
-  function renderResultHTML(){
-    const slot = board[pendingIndex];
-    const prize = PRIZES.find(p => p.id === slot.prizeId);
-    const isTry = !!prize.isTryAgain;
-    return `
-      <header>
-        <div class="eyebrow">Box ${pendingIndex + 1}</div>
-        <h1 style="font-size:clamp(28px,5vw,44px);">${isTry ? 'So close!' : 'Prize Claimed!'}</h1>
-      </header>
-      <div class="screen">
-        <span style="font-size:64px;display:block;">${prize.icon}</span>
-        <div style="font-size:18px;font-weight:600;color:${isTry ? 'var(--slate)' : 'var(--gold-soft)'};margin:10px 0 14px;">
-          ${isTry ? prize.name : prize.name}
-        </div>
-        <p style="color:var(--text-muted);font-size:13px;margin-bottom:26px;">
-          ${isTry ? 'No prize this time — thanks for playing!' : `Thanks ${escapeHtml(slot.claimedName)}! Show this screen to the host to collect your prize.`}
-        </p>
-        <button class="primary-btn" data-action="next-player">Next Player →</button>
-      </div>
-    `;
-  }
-
-  function renderWinnersHTML(){
-    const rows = winners.length ? winners.map(w => {
-      const prize = PRIZES.find(p => p.id === w.prizeId);
-      return `
-        <div class="winners-row">
-          <div class="w-icon">${prize.icon}</div>
-          <div class="w-info">
-            <div class="w-name">${escapeHtml(w.name)} — ${prize.name}</div>
-            <div class="w-meta">${escapeHtml(w.phone)} · Box ${w.boxIndex + 1}</div>
-          </div>
-        </div>`;
-    }).join('') : `<p style="color:var(--text-muted);font-size:13px;">No prizes claimed yet.</p>`;
-
-    return `
-      <header>
-        <div class="eyebrow">Host Record</div>
-        <h1 style="font-size:clamp(28px,5vw,44px);">Winners List</h1>
-        <p>Names and numbers collected so far — for prize collection follow-up.</p>
-      </header>
-      <div class="screen" style="max-width:460px;">
-        <div class="sidebar" style="text-align:left;">
-          ${rows}
-        </div>
-        <button class="primary-btn" style="margin-top:20px;" data-action="back-to-game">← Back to Game</button>
-      </div>
-    `;
-  }
-
-  function handlePick(index){
-    if(board[index].claimedBy) return;
-    board[index].claimedBy = true;
-    pendingIndex = index;
-    const prize = PRIZES.find(p => p.id === board[index].prizeId);
-    if(prize.isTryAgain){
-      screen = 'result';
-    } else {
-      screen = 'claim';
-      launchConfetti();
-    }
-    render();
-  }
-
-  function handleSubmitClaim(){
-    const name = document.getElementById('claimName').value.trim();
-    const phone = document.getElementById('claimPhone').value.trim();
-    const errorEl = document.getElementById('claimError');
-    if(!name || !phone){ errorEl.textContent = 'Please fill in both name and phone number.'; return; }
-    if(phone.replace(/\D/g, '').length < 8){ errorEl.textContent = 'Please enter a valid phone number.'; return; }
-
-    board[pendingIndex].claimedName = name;
-    board[pendingIndex].claimedPhone = phone;
-    winners.push({ name, phone, prizeId: board[pendingIndex].prizeId, boxIndex: pendingIndex });
-    screen = 'result';
-    render();
-  }
-
-  function handleNextPlayer(){
-    pendingIndex = null;
-    screen = 'pick';
-    render();
-  }
-
-  function handleShowWinners(){ screen = 'winners'; render(); }
-  function handleBackToGame(){ screen = 'pick'; render(); }
-
-  function handleResetGame(){
-    if(!confirm('Reset the board? All boxes will be re-shuffled and the winners list cleared.')) return;
-    board = buildBoard();
-    winners = [];
-    pendingIndex = null;
-    screen = 'pick';
-    render();
-  }
-
-  document.getElementById('app').addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-action]');
-    if(!btn) return;
-    const action = btn.dataset.action;
-    if(action === 'pick') handlePick(parseInt(btn.dataset.index, 10));
-    else if(action === 'submit-claim') handleSubmitClaim();
-    else if(action === 'next-player') handleNextPlayer();
-    else if(action === 'show-winners') handleShowWinners();
-    else if(action === 'back-to-game') handleBackToGame();
-    else if(action === 'reset-game') handleResetGame();
-  });
-
-  document.getElementById('app').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' && screen === 'claim'){
-      const target = e.target;
-      if(target.id === 'claimName' || target.id === 'claimPhone') handleSubmitClaim();
+/* ---------- HERO intro timeline ---------- */
+// split title into chars
+const title=document.getElementById("heroTitle");
+title.innerHTML = title.innerHTML.replace(/<span class="g">(.*?)<\/span>/,(m,p)=>`<span class="g">${p}</span>`);
+(function splitChars(el){
+  const walk=[...el.childNodes];
+  el.innerHTML="";
+  walk.forEach(node=>{
+    if(node.nodeType===3){ // text
+      node.textContent.split("").forEach(ch=>{
+        const s=document.createElement("span");
+        s.className="char"; s.textContent=ch===" "?" ":ch;
+        el.appendChild(s);
+      });
+    } else { // <span class="g">
+      node.textContent.split("").forEach(ch=>{
+        const s=document.createElement("span");
+        s.className="char g"; s.textContent=ch===" "?" ":ch;
+        el.appendChild(s);
+      });
     }
   });
+})(title);
 
-  function launchConfetti(){
-    const colors = ['#F5B942', '#3DDBD9', '#FF8FD6', '#5FD97A', '#FFDE9E'];
-    const layer = document.getElementById('confettiLayer');
-    for(let i = 0; i < 70; i++){
-      const el = document.createElement('div');
-      el.className = 'confetti-piece';
-      el.style.left = Math.random() * 100 + 'vw';
-      el.style.background = colors[Math.floor(Math.random() * colors.length)];
-      el.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
-      el.style.animationDelay = (Math.random() * 0.4) + 's';
-      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      layer.appendChild(el);
-      setTimeout(() => el.remove(), 4500);
-    }
-  }
+const tl=gsap.timeline({defaults:{ease:"power4.out"}});
+tl.from("#heroBg",{scale:1.35,duration:2.2,ease:"power2.out"},0)
+  .from("#kicker",{y:24,opacity:0,duration:.8},.2)
+  .from("#heroTitle .char",{yPercent:120,opacity:0,stagger:.03,duration:1},.35)
+  .from("#heroSub",{y:24,opacity:0,duration:.9},"-=.5")
+  .from("#heroCta a",{y:24,opacity:0,stagger:.12,duration:.7},"-=.6")
+  .from(".wa-btn",{y:-16,opacity:0,duration:.6},"-=.8")
+  .from(".scroll-cue",{opacity:0,duration:.8},"-=.3");
 
-  const sparkleField = document.getElementById('sparkleField');
-  for(let i = 0; i < 26; i++){
-    const s = document.createElement('div');
-    s.className = 'sparkle';
-    s.style.left = Math.random() * 100 + 'vw';
-    s.style.top = Math.random() * 100 + 'vh';
-    s.style.animationDelay = (Math.random() * 8) + 's';
-    s.style.animationDuration = (6 + Math.random() * 6) + 's';
-    sparkleField.appendChild(s);
-  }
+/* Hero parallax on scroll */
+gsap.to("#heroBg",{yPercent:22,ease:"none",
+  scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
+gsap.to(".hero-inner",{yPercent:-14,opacity:.4,ease:"none",
+  scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
 
-  board = buildBoard();
-  render();
+/* ---------- Marquee loop ---------- */
+gsap.to("#marquee",{xPercent:-50,repeat:-1,duration:22,ease:"none"});
+
+/* ---------- Generic reveals ---------- */
+gsap.utils.toArray(".reveal").forEach(el=>{
+  gsap.fromTo(el,{y:60,opacity:0},{y:0,opacity:1,duration:1,ease:"power3.out",
+    scrollTrigger:{trigger:el,start:"top 85%"}});
+});
+
+/* ---------- Collection cards stagger ---------- */
+gsap.fromTo("#carGrid .car",{y:80,opacity:0,scale:.96},
+  {y:0,opacity:1,scale:1,duration:.9,ease:"power3.out",stagger:.12,
+   scrollTrigger:{trigger:"#carGrid",start:"top 80%"}});
+
+/* Card image parallax */
+gsap.utils.toArray("#carGrid .car .img img").forEach(img=>{
+  gsap.fromTo(img,{yPercent:-8},{yPercent:8,ease:"none",
+    scrollTrigger:{trigger:img,start:"top bottom",end:"bottom top",scrub:true}});
+});
+
+/* ---------- Section heads: heading line rise ---------- */
+gsap.utils.toArray(".sec-head h2").forEach(h=>{
+  gsap.from(h,{y:40,opacity:0,duration:1,ease:"power3.out",
+    scrollTrigger:{trigger:h,start:"top 85%"}});
+});
+
+/* ---------- Stats count-up (replays each time it scrolls into view) ---------- */
+gsap.utils.toArray(".stat .num").forEach(el=>{
+  const end=+el.dataset.count, suf=el.dataset.suffix||"", obj={v:0};
+  const run=()=>{ obj.v=0;
+    gsap.to(obj,{v:end,duration:2,ease:"power2.out",overwrite:true,
+      onUpdate:()=>el.textContent=Math.floor(obj.v)+suf});
+  };
+  ScrollTrigger.create({
+    trigger:el, start:"top 88%", end:"bottom 12%",
+    onEnter:run,        // scrolling down into view
+    onEnterBack:run,    // scrolling up into view
+    onLeave:()=>{el.textContent="0"+suf;},      // reset after passing below
+    onLeaveBack:()=>{el.textContent="0"+suf;},  // reset after passing above
+  });
+});
+
+/* ---------- Parallax banner ---------- */
+gsap.to("#pbg",{yPercent:20,ease:"none",
+  scrollTrigger:{trigger:".banner",start:"top bottom",end:"bottom top",scrub:true}});
+
+/* ---------- Card hover tilt + click to preview ---------- */
+document.querySelectorAll("#carGrid .car").forEach(card=>{
+  card.addEventListener("mousemove",e=>{
+    const r=card.getBoundingClientRect();
+    const rx=((e.clientY-r.top)/r.height-.5)*-8;
+    const ry=((e.clientX-r.left)/r.width-.5)*8;
+    gsap.to(card,{rotateX:rx,rotateY:ry,transformPerspective:800,duration:.4,ease:"power2.out"});
+  });
+  card.addEventListener("mouseleave",()=>gsap.to(card,{rotateX:0,rotateY:0,duration:.6,ease:"power3.out"}));
+  card.addEventListener("click",()=>openPreview(+card.dataset.i));
+});
+
+/* ---------- Preview modal ---------- */
+const WA = "https://wa.me/60127871321?text=";
+const modal=document.getElementById("modal");
+const modalBg=document.getElementById("modalBg");
+const modalCard=document.getElementById("modalCard");
+const mMainImg=document.getElementById("mMainImg");
+const mThumbs=document.getElementById("mThumbs");
+
+function openPreview(i){
+  const c=CARS[i];
+  document.getElementById("mBadge").textContent=c.badge;
+  document.getElementById("mName").textContent=c.name;
+  document.getElementById("mPrice").textContent=c.price;
+  document.getElementById("mSpecs").innerHTML=`
+    <div class="s"><small>Power</small><b>${c.hp}</b></div>
+    <div class="s"><small>Top Speed</small><b>${c.top}</b></div>
+    <div class="s"><small>Year</small><b>${c.yr}</b></div>
+    <div class="s"><small>Mileage</small><b>${c.km}</b></div>`;
+  // gallery
+  mMainImg.src=U(c.gallery[0]); mMainImg.style.display="";
+  mThumbs.innerHTML=c.gallery.map((g,gi)=>
+    `<button class="${gi===0?'active':''}" data-src="${U(g)}"><img src="${U(g)}" alt="" onerror="this.style.display='none'"></button>`).join("");
+  mThumbs.querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click",()=>{
+      mMainImg.style.display=""; mMainImg.src=b.dataset.src;
+      mThumbs.querySelectorAll("button").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      gsap.fromTo(mMainImg,{opacity:0,scale:1.04},{opacity:1,scale:1,duration:.5,ease:"power2.out"});
+    });
+  });
+  // action links (WhatsApp pre-filled with the exact car)
+  document.getElementById("mBook").href = WA + encodeURIComponent(
+    `Hi APEX EXOTICS, I'd like to BOOK A TEST DRIVE for the ${c.name} (${c.price}). When is it available?`);
+  document.getElementById("mEnq").href = WA + encodeURIComponent(
+    `Hi APEX EXOTICS, I'd like to enquire about the ${c.name} (${c.price}).`);
+
+  // open animation
+  modal.classList.add("open"); modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  gsap.to(modalBg,{opacity:1,duration:.4,ease:"power2.out"});
+  gsap.fromTo(modalCard,{opacity:0,y:40,scale:.96},{opacity:1,y:0,scale:1,duration:.55,ease:"power3.out"});
+}
+
+function closePreview(){
+  gsap.to(modalBg,{opacity:0,duration:.3});
+  gsap.to(modalCard,{opacity:0,y:30,scale:.97,duration:.3,ease:"power2.in",onComplete:()=>{
+    modal.classList.remove("open"); modal.setAttribute("aria-hidden","true");
+    document.body.style.overflow="";
+  }});
+}
+document.getElementById("modalClose").addEventListener("click",closePreview);
+modalBg.addEventListener("click",closePreview);
+window.addEventListener("keydown",e=>{ if(e.key==="Escape" && modal.classList.contains("open")) closePreview(); });
 </script>
 </body>
 </html>
