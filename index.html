@@ -42,7 +42,7 @@
     display:flex;align-items:center;justify-content:space-between;
     padding:22px 40px;transition:.4s;
   }
-  nav.scrolled{background:rgba(10,10,12,.82);backdrop-filter:blur(12px);
+  nav.scrolled{background:rgba(10,10,12,.96);
     padding:14px 40px;border-bottom:1px solid var(--line)}
   .brand{font-family:"Syncopate";font-size:19px;font-weight:700;letter-spacing:.14em}
   .brand span{color:var(--gold)}
@@ -60,7 +60,7 @@
 
   /* ---------- HERO ---------- */
   .hero{position:relative;height:100vh;min-height:640px;overflow:hidden;display:flex;align-items:center}
-  .hero-bg{position:absolute;inset:0;z-index:0;transform:scale(1.15);
+  .hero-bg{position:absolute;inset:0;z-index:0;transform:scale(1.12);
     background:linear-gradient(120deg,#1a1206,#0a0a0c)}
   .hero-bg img{opacity:.62}
   .hero-grad{position:absolute;inset:0;z-index:1;
@@ -99,6 +99,34 @@
   .sec-head p{color:var(--muted);margin-top:18px;font-size:16px}
 
   /* ---------- COLLECTION GRID ---------- */
+  /* ---------- COLLECTION SLIDER ---------- */
+  .slider{overflow:hidden;margin:0 -6px;padding:6px;-webkit-overflow-scrolling:touch}
+  .slider-track{display:flex;gap:24px;cursor:grab;will-change:transform;user-select:none}
+  .slider-track.dragging{cursor:grabbing}
+  .slider-track .car{flex:0 0 calc(25% - 18px)}   /* up to 4 in view */
+  @media(max-width:1100px){ .slider-track .car{flex:0 0 calc(33.333% - 16px)} }
+  @media(max-width:760px){ .slider-track .car{flex:0 0 calc(50% - 12px)} }
+  @media(max-width:520px){ .slider-track .car{flex:0 0 82vw} }
+  .slider-nav{display:flex;align-items:center;gap:18px;margin-top:34px}
+  /* expanded = full grid of every car */
+  #collection.expanded .slider{overflow:visible}
+  #collection.expanded .slider-track{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;
+    transform:none!important;cursor:default}
+  #collection.expanded .slider-nav{display:none}
+  @media(max-width:1100px){ #collection.expanded .slider-track{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:760px){ #collection.expanded .slider-track{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:520px){ #collection.expanded .slider-track{grid-template-columns:1fr} }
+  .view-more{text-align:center;margin-top:40px}
+  .view-more button{border:none;font-family:inherit;cursor:pointer}
+  .slider-nav button{width:52px;height:52px;border-radius:50%;background:var(--panel);
+    border:1px solid var(--line);color:#fff;font-size:22px;cursor:pointer;transition:.3s;
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .slider-nav button:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+  .slider-nav button:disabled{opacity:.3;cursor:default}
+  .slider-progress{flex:1;height:3px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;max-width:340px}
+  .slider-progress i{display:block;height:100%;width:30%;background:linear-gradient(90deg,var(--gold),var(--gold-2));border-radius:3px}
+  .slider-hint{margin-left:auto;color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+
   .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
   .car{position:relative;border-radius:16px;overflow:hidden;background:var(--panel);
     border:1px solid var(--line);aspect-ratio:4/3.4;cursor:pointer}
@@ -259,19 +287,18 @@
 
   /* ---------- CUSTOM CURSOR ---------- */
   .cursor-dot,.cursor-ring{position:fixed;top:0;left:0;z-index:300;pointer-events:none;
-    border-radius:50%;transform:translate(-50%,-50%);mix-blend-mode:difference}
+    border-radius:50%;will-change:transform}
   .cursor-dot{width:7px;height:7px;background:var(--gold-2)}
-  .cursor-ring{width:38px;height:38px;border:1.5px solid rgba(240,212,136,.7);transition:width .3s,height .3s,background .3s,border-color .3s}
+  .cursor-ring{width:38px;height:38px;border:1.5px solid rgba(240,212,136,.85);transition:width .3s,height .3s,background .3s,border-color .3s}
   .cursor-ring.hot{width:64px;height:64px;background:rgba(240,212,136,.12);border-color:var(--gold-2)}
   body.has-cursor{cursor:none}
   body.has-cursor a,body.has-cursor button,body.has-cursor .car{cursor:none}
   @media (hover:none),(pointer:coarse){ .cursor-dot,.cursor-ring{display:none!important} body.has-cursor{cursor:auto} }
 
-  /* ---------- FILM GRAIN ---------- */
-  .grain{position:fixed;inset:-50%;z-index:150;pointer-events:none;opacity:.045;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    animation:grain 1s steps(4) infinite}
-  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-4%,3%)}50%{transform:translate(3%,-4%)}75%{transform:translate(-3%,-3%)}100%{transform:translate(4%,3%)}}
+  /* ---------- FILM GRAIN (static, own compositor layer — no per-frame repaint) ---------- */
+  .grain{position:fixed;inset:0;z-index:150;pointer-events:none;opacity:.04;
+    transform:translateZ(0);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
   /* clip reveal helper for card images */
   .car .img img{clip-path:inset(0 0 0 0)}
@@ -301,8 +328,7 @@
 </div>
 <div class="pl-panels" id="plPanels"><i></i><i></i><i></i><i></i><i></i></div>
 
-<!-- FILM GRAIN + CUSTOM CURSOR -->
-<div class="grain"></div>
+<!-- CUSTOM CURSOR -->
 <div class="cursor-ring" id="cursorRing"></div>
 <div class="cursor-dot" id="cursorDot"></div>
 
@@ -359,8 +385,19 @@
     <h2>Curated Supercars,<br>Ready to Drive</h2>
     <p>Every car in our showroom is fully inspected, documented and detailed. Prices are indicative — enquire on WhatsApp for the latest availability.</p>
   </div>
-  <div class="grid" id="carGrid">
-    <!-- cards injected -->
+  <div class="slider" id="slider">
+    <div class="slider-track" id="carGrid">
+      <!-- cards injected -->
+    </div>
+  </div>
+  <div class="slider-nav reveal">
+    <button id="prevBtn" aria-label="Previous">‹</button>
+    <button id="nextBtn" aria-label="Next">›</button>
+    <div class="slider-progress"><i id="sliderBar"></i></div>
+    <span class="slider-hint">Drag / swipe →</span>
+  </div>
+  <div class="view-more reveal">
+    <button class="btn-gold" id="viewMore">View Full Collection</button>
   </div>
 </section>
 
@@ -496,10 +533,9 @@
   </div>
 </div>
 
-<!-- GSAP + Lenis smooth scroll -->
+<!-- GSAP -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
@@ -592,12 +628,6 @@ tl.from("#heroBg",{scale:1.35,duration:2.2,ease:"power2.out"},0)
   .from(".wa-btn",{y:-16,opacity:0,duration:.6},"-=.8")
   .from(".scroll-cue",{opacity:0,duration:.8},"-=.3");
 
-/* Hero parallax on scroll */
-gsap.to("#heroBg",{yPercent:22,ease:"none",
-  scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
-gsap.to(".hero-inner",{yPercent:-14,opacity:.4,ease:"none",
-  scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
-
 /* ---------- Marquee loop ---------- */
 gsap.to("#marquee",{xPercent:-50,repeat:-1,duration:22,ease:"none"});
 
@@ -611,12 +641,6 @@ gsap.utils.toArray(".reveal").forEach(el=>{
 gsap.fromTo("#carGrid .car",{y:80,opacity:0,scale:.96},
   {y:0,opacity:1,scale:1,duration:.9,ease:"power3.out",stagger:.12,
    scrollTrigger:{trigger:"#carGrid",start:"top 80%"}});
-
-/* Card image parallax */
-gsap.utils.toArray("#carGrid .car .img img").forEach(img=>{
-  gsap.fromTo(img,{yPercent:-8},{yPercent:8,ease:"none",
-    scrollTrigger:{trigger:img,start:"top bottom",end:"bottom top",scrub:true}});
-});
 
 /* ---------- Section heads: heading line rise ---------- */
 gsap.utils.toArray(".sec-head h2").forEach(h=>{
@@ -640,21 +664,72 @@ gsap.utils.toArray(".stat .num").forEach(el=>{
   });
 });
 
-/* ---------- Parallax banner ---------- */
-gsap.to("#pbg",{yPercent:20,ease:"none",
-  scrollTrigger:{trigger:".banner",start:"top bottom",end:"bottom top",scrub:true}});
+/* ---------- Parallax banner (light, transform-only) ---------- */
+gsap.fromTo("#pbg",{yPercent:-6},{yPercent:6,ease:"none",
+  scrollTrigger:{trigger:".banner",start:"top bottom",end:"bottom top",scrub:.6}});
 
-/* ---------- Card hover tilt + click to preview ---------- */
-document.querySelectorAll("#carGrid .car").forEach(card=>{
-  card.addEventListener("mousemove",e=>{
-    const r=card.getBoundingClientRect();
-    const rx=((e.clientY-r.top)/r.height-.5)*-8;
-    const ry=((e.clientX-r.left)/r.width-.5)*8;
-    gsap.to(card,{rotateX:rx,rotateY:ry,transformPerspective:800,duration:.4,ease:"power2.out"});
-  });
-  card.addEventListener("mouseleave",()=>gsap.to(card,{rotateX:0,rotateY:0,duration:.6,ease:"power3.out"}));
-  card.addEventListener("click",()=>openPreview(+card.dataset.i));
+/* ---------- Collection slider: drag + arrows (GPU-light) ---------- */
+const slider=document.getElementById("slider");
+const track=document.getElementById("carGrid");
+const prevBtn=document.getElementById("prevBtn");
+const nextBtn=document.getElementById("nextBtn");
+const sliderBar=document.getElementById("sliderBar");
+let pos=0, maxScroll=0, dragActive=false, dragged=false, startX=0, startPos=0;
+
+function measure(){ maxScroll=Math.max(0, track.scrollWidth - slider.clientWidth); clamp(); }
+function clamp(){ pos=Math.max(-maxScroll, Math.min(0, pos)); apply(); }
+function apply(){
+  gsap.set(track,{x:pos});
+  const p=maxScroll? (-pos/maxScroll):0;
+  sliderBar.style.width=(20+p*80)+"%";
+  prevBtn.disabled = pos>=0;
+  nextBtn.disabled = pos<=-maxScroll;
+}
+function step(){ const card=track.querySelector(".car"); return card? card.offsetWidth+24 : 380; }
+function goTo(x){ pos=x; clamp(); }
+function slide(dir){ gsap.to({v:pos},{v:pos - dir*step(), duration:.6, ease:"power3.out",
+  onUpdate:function(){ pos=this.targets()[0].v; clamp(); }}); }
+
+prevBtn.addEventListener("click",()=>slide(-1));
+nextBtn.addEventListener("click",()=>slide(1));
+
+/* pointer drag + click-to-preview (open the card we pressed if we didn't drag) */
+let downCard=null;
+track.addEventListener("pointerdown",e=>{
+  dragActive=true; dragged=false; startX=e.clientX; startPos=pos;
+  downCard=e.target.closest(".car");
+  track.classList.add("dragging"); track.setPointerCapture(e.pointerId);
 });
+track.addEventListener("pointermove",e=>{
+  if(!dragActive) return;
+  const dx=e.clientX-startX;
+  if(Math.abs(dx)>6) dragged=true;
+  pos=startPos+dx; clamp();
+});
+function endDrag(){
+  if(!dragActive) return;
+  dragActive=false; track.classList.remove("dragging");
+  if(!dragged && downCard){ openPreview(+downCard.dataset.i); }
+  downCard=null;
+}
+track.addEventListener("pointerup",endDrag);
+track.addEventListener("pointercancel",endDrag);
+
+window.addEventListener("resize",measure);
+window.addEventListener("load",measure);
+measure();
+
+/* ---------- View More: expand slider into full grid ---------- */
+const collectionSec=document.getElementById("collection");
+const viewMoreBtn=document.getElementById("viewMore");
+if(viewMoreBtn){
+  viewMoreBtn.addEventListener("click",()=>{
+    const exp=collectionSec.classList.toggle("expanded");
+    viewMoreBtn.textContent = exp ? "Show Less" : "View Full Collection";
+    if(!exp){ pos=0; gsap.set(track,{x:0}); }
+    requestAnimationFrame(()=>{ measure(); ScrollTrigger.refresh(); });
+  });
+}
 
 /* ---------- Preview modal ---------- */
 const WA = "https://wa.me/60127871321?text=";
@@ -714,21 +789,12 @@ window.addEventListener("keydown",e=>{ if(e.key==="Escape" && modal.classList.co
    PREMIUM LAYER — smooth scroll · preloader · cursor · magnetic
    ======================================================= */
 
-/* --- Lenis smooth scroll, synced to ScrollTrigger --- */
-let lenis=null;
-if(window.Lenis){
-  lenis=new Lenis({duration:1.15,smoothWheel:true,
-    easing:t=>Math.min(1,1.001-Math.pow(2,-10*t))});
-  lenis.on("scroll",ScrollTrigger.update);
-  gsap.ticker.add(t=>lenis.raf(t*1000));
-  gsap.ticker.lagSmoothing(0);
-  lenis.stop(); // locked until preloader finishes
-}
-/* smooth anchor links */
+/* --- Light native smooth scroll (no per-frame library; jank-free) --- */
+const lenis=null; // kept for reference in older calls; native scroll is used
 document.querySelectorAll('a[href^="#"]').forEach(a=>{
   a.addEventListener("click",e=>{
     const t=document.querySelector(a.getAttribute("href"));
-    if(t){ e.preventDefault(); lenis? lenis.scrollTo(t,{offset:-70}) : t.scrollIntoView({behavior:"smooth"}); }
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:"smooth"}); }
   });
 });
 
@@ -737,7 +803,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
   const pre=document.getElementById("preloader");
   const bar=document.getElementById("plBar");
   const pct=document.getElementById("plPct");
-  const done=()=>{ lenis&&lenis.start(); window.heroTL&&window.heroTL.play(0); ScrollTrigger.refresh(); };
+  document.documentElement.style.overflow="hidden"; // lock scroll during intro
+  const done=()=>{ document.documentElement.style.overflow=""; window.heroTL&&window.heroTL.play(0); ScrollTrigger.refresh(); };
   gsap.timeline()
     .to(bar,{width:"100%",duration:1.5,ease:"power1.inOut",
       onUpdate:function(){ pct.textContent=Math.round(this.progress()*100)+"%"; }})
@@ -771,19 +838,11 @@ document.querySelectorAll(".btn-gold,.btn-ghost,.wa-btn,.fab,.m-book,.m-enq").fo
   btn.addEventListener("mouseleave",()=>gsap.to(btn,{x:0,y:0,duration:.6,ease:"elastic.out(1,.4)"}));
 });
 
-/* --- Car image clip-reveal on scroll --- */
-gsap.utils.toArray("#carGrid .car .img").forEach(box=>{
-  gsap.fromTo(box,{clipPath:"inset(0 0 100% 0)"},
-    {clipPath:"inset(0 0 0% 0)",duration:1.1,ease:"power3.out",
-     scrollTrigger:{trigger:box,start:"top 88%"}});
-});
-
-/* --- Nav links + section headings: gold underline sweep already via hover; add heading char lift on hero handled above --- */
 
 /* Fallback: if preloader/GSAP hiccups, never leave the page hidden */
 setTimeout(()=>{ const p=document.getElementById("preloader"); const pp=document.getElementById("plPanels");
   if(p&&getComputedStyle(p).display!=="none"){ p.style.display="none"; if(pp)pp.style.display="none";
-    lenis&&lenis.start(); window.heroTL&&window.heroTL.play(0); }
+    document.documentElement.style.overflow=""; window.heroTL&&window.heroTL.play(0); }
 },4000);
 </script>
 </body>
