@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Draw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg-deep:#0F0C29;
+    --bg-mid:#1B1640;
+    --panel:#221C4C;
+    --panel-line:#352C6E;
+    --card-a:#4C3A9C;
+    --card-b:#2A2168;
+    --gold:#F5B942;
+    --gold-soft:#FFDE9E;
+    --cyan:#3DDBD9;
+    --pink:#FF8FD6;
+    --green:#5FD97A;
+    --slate:#8B85B8;
+    --danger:#FF8B8B;
+    --text:#F5F3FF;
+    --text-muted:#9C93C4;
+    --font-display:'Space Grotesk', 'Arial Black', sans-serif;
+    --font-body:'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(61,219,217,0.10), transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(245,185,66,0.10), transparent 45%),
+      linear-gradient(160deg, var(--bg-deep), var(--bg-mid));
+    font-family:var(--font-body);
+    color:var(--text);
+    overflow-x:hidden;
+    padding:28px 20px 60px;
+  }
+
+  .sparkle-field{position:fixed; inset:0; pointer-events:none; z-index:0;}
+  .sparkle{
+    position:absolute; width:3px; height:3px; border-radius:50%;
+    background:var(--gold-soft); opacity:0.5;
+    animation:drift 8s ease-in-out infinite;
+  }
+  @keyframes drift{
+    0%,100%{ transform:translateY(0) scale(1); opacity:0.2; }
+    50%{ transform:translateY(-22px) scale(1.6); opacity:0.7; }
+  }
+
+  .stage{ position:relative; z-index:1; max-width:1120px; margin:0 auto; }
+
+  header{ text-align:center; margin-bottom:26px; }
+  .eyebrow{
+    font-family:var(--font-body); font-weight:600; letter-spacing:0.24em;
+    font-size:12px; text-transform:uppercase; color:var(--cyan);
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--font-display); font-weight:700;
+    font-size:clamp(34px, 6vw, 58px); line-height:1;
+    background:linear-gradient(100deg, var(--gold-soft), var(--gold) 45%, #fff 55%, var(--gold) 70%);
+    background-size:220% auto;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:shine 5s linear infinite;
+  }
+  @keyframes shine{ to{ background-position:-220% center; } }
+  header p{ margin-top:10px; color:var(--text-muted); font-size:14px; }
+
+  .layout{ display:grid; grid-template-columns:1fr 300px; gap:28px; align-items:start; }
+  @media (max-width:860px){ .layout{ grid-template-columns:1fr; } }
+
+  .board{ background:rgba(255,255,255,0.02); border:1px solid var(--panel-line); border-radius:20px; padding:26px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr)); gap:14px; }
+
+  .box{ all:unset; cursor:pointer; aspect-ratio:3/4; perspective:900px; border-radius:14px; }
+  .box:focus-visible .box-inner{ outline:2px solid var(--cyan); outline-offset:3px; }
+  .box.locked{ cursor:default; }
+
+  .box-inner{ position:relative; width:100%; height:100%; transition:transform 0.5s cubic-bezier(.2,.9,.25,1); transform-style:preserve-3d; }
+  .box:not(.locked):hover .box-inner{ transform:translateY(-4px) scale(1.02); }
+
+  .box-face{
+    position:absolute; inset:0; border-radius:14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    backface-visibility:hidden; padding:6px; text-align:center;
+  }
+  .box-front{
+    background:linear-gradient(150deg, var(--card-a), var(--card-b));
+    border:1px solid rgba(255,255,255,0.10);
+    box-shadow:0 8px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .box-front .gift-icon{ font-size:26px; margin-bottom:6px; }
+  .box-front .num{ font-family:var(--font-display); font-size:11px; letter-spacing:0.08em; color:var(--text-muted); word-break:break-word; }
+  .taken-box .box-front{ opacity:0.5; border-color:rgba(95,217,122,0.35); }
+  .taken-box .box-front .num{ color:var(--green); }
+
+  .sidebar{ background:rgba(255,255,255,0.02); border:1px solid var(--panel-line); border-radius:20px; padding:22px; }
+  .sidebar h2{ font-family:var(--font-display); font-size:13px; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; }
+  .prize-row{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--panel-line); }
+  .prize-row:last-child{ border-bottom:none; }
+  .prize-row .swatch{ width:32px; height:32px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:15px; background:rgba(255,255,255,0.06); }
+  .prize-row .info{ flex:1; min-width:0; }
+  .prize-row .info .name{ font-size:12px; font-weight:600; color:var(--text); }
+  .prize-row .info .count{ font-size:11px; color:var(--text-muted); margin-top:1px; }
+  .prize-row .count.empty{ color:var(--slate); text-decoration:line-through; }
+
+  .screen{ max-width:400px; margin:50px auto; text-align:center; padding:0 6px; }
+  .field{ margin-bottom:14px; text-align:left; }
+  .field label{ font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block; font-weight:600; }
+  .field input{ width:100%; padding:13px 14px; border-radius:10px; border:1px solid var(--panel-line); background:rgba(255,255,255,0.04); color:var(--text); font-size:15px; font-family:var(--font-body); }
+  .field input:focus{ outline:2px solid var(--cyan); border-color:transparent; }
+
+  .primary-btn{ width:100%; padding:14px; border-radius:12px; border:none; background:var(--gold); color:#1A1540; font-weight:700; font-size:15px; cursor:pointer; font-family:var(--font-body); transition:transform 0.15s; }
+  .primary-btn:hover{ transform:translateY(-1px); }
+
+  .qr-card{ background:#fff; border-radius:16px; padding:16px; display:inline-block; margin:14px 0; }
+  .link-row{ display:flex; gap:8px; max-width:420px; margin:0 auto; }
+  .link-row input{ flex:1; padding:11px 12px; border-radius:10px; border:1px solid var(--panel-line); background:rgba(255,255,255,0.04); color:var(--text-muted); font-size:12px; }
+  .copy-btn{ padding:0 16px; border-radius:10px; border:1px solid var(--panel-line); background:transparent; color:var(--text); cursor:pointer; font-weight:600; font-size:13px; }
+  .copy-btn:hover{ border-color:var(--cyan); }
+
+  .waiting-spinner{ width:34px; height:34px; border-radius:50%; border:3px solid var(--panel-line); border-top-color:var(--cyan); margin:22px auto; animation:spin 1s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .error-text{ color:var(--danger); font-size:12px; margin-top:10px; min-height:14px; }
+
+  .confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:60; overflow:hidden; }
+  .confetti-piece{ position:absolute; top:-20px; width:8px; height:14px; opacity:0.95; animation:fall linear forwards; }
+  @keyframes fall{ to{ transform:translateY(110vh) rotate(540deg); opacity:0.3; } }
+</style>
+</head>
+<body>
+
+<div class="sparkle-field" id="sparkleField"></div>
+<div class="stage" id="app"></div>
+<div class="confetti-layer" id="confettiLayer"></div>
+
+<script>
+  const PRIZES = [
+    { id:'earphone', name:'Xiaomi Earphone AirPlus 5', icon:'🎧', qty:5, color:'#3DDBD9' },
+    { id:'band',     name:'Xiaomi Band Watch 5',        icon:'⌚', qty:1, color:'#FF8FD6' },
+    { id:'laptop',   name:'Honor Madbook 3',             icon:'💻', qty:1, color:'#F5B942' },
+    { id:'voucher',  name:'Cash Voucher RM50',           icon:'💵', qty:3, color:'#5FD97A' },
+    { id:'tryagain', name:'Try Again Later',             icon:'🍀', qty:10, color:'#8B85B8', isTryAgain:true }
+  ];
+
+  const params = new URLSearchParams(location.search);
+  const isHost = params.get('host') === '1';
+  let myPhone = params.get('phone') || null;
+  let game = { board:null, players:{}, started:false };
+  let currentScreen = 'loading';
+  const POLLABLE = ['waiting','pick','host'];
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function defaultGame(){ return { board:null, players:{}, started:false }; }
+
+  async function loadGame(){
+    try{
+      const res = await window.storage.get('game', true);
+      return res && res.value ? JSON.parse(res.value) : defaultGame();
+    }catch(e){
+      return defaultGame();
+    }
+  }
+
+  async function saveGame(g){
+    try{
+      await window.storage.set('game', JSON.stringify(g), true);
+    }catch(e){
+      console.error('Could not save game state', e);
+    }
+  }
+
+  function buildBoard(){
+    const pool = [];
+    PRIZES.forEach(p => { for(let i = 0; i < p.qty; i++) pool.push({ prizeId:p.id, claimedBy:null, claimedName:null }); });
+    for(let i = pool.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool;
+  }
+
+  function remainingCounts(){
+    const counts = {};
+    PRIZES.forEach(p => counts[p.id] = p.qty);
+    if(game.board){ game.board.forEach(slot => { if(slot.claimedBy) counts[slot.prizeId]--; }); }
+    return counts;
+  }
+
+  function poolHtml(){
+    const remaining = remainingCounts();
+    return PRIZES.map(p => `
+      <div class="prize-row">
+        <div class="swatch">${p.icon}</div>
+        <div class="info">
+          <div class="name">${p.name}</div>
+          <div class="count ${remaining[p.id] === 0 ? 'empty' : ''}">${remaining[p.id]} of ${p.qty} left</div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function refresh(){
+    game = await loadGame();
+    render();
+  }
+
+  function render(){
+    const app = document.getElementById('app');
+    if(isHost){
+      currentScreen = 'host';
+      app.innerHTML = renderHostHTML();
+      renderQr();
+      return;
+    }
+    if(!myPhone || !game.players[myPhone]){
+      currentScreen = 'join';
+      app.innerHTML = renderJoinHTML();
+      return;
+    }
+    const me = game.players[myPhone];
+    if(me.pickedIndex !== null && me.pickedIndex !== undefined){
+      const alreadyShown = currentScreen === 'result';
+      currentScreen = 'result';
+      app.innerHTML = renderResultHTML(me);
+      if(!alreadyShown){
+        const prize = PRIZES.find(p => p.id === game.board[me.pickedIndex].prizeId);
+        if(!prize.isTryAgain) launchConfetti();
+      }
+      return;
+    }
+    if(!game.started){
+      currentScreen = 'waiting';
+      app.innerHTML = renderWaitingHTML(me);
+      return;
+    }
+    currentScreen = 'pick';
+    app.innerHTML = renderPickHTML();
+  }
+
+  function renderJoinHTML(){
+    return `
+      <div class="screen">
+        <div class="eyebrow">Team Icebreaker</div>
+        <h1 style="font-size:32px;">Join the Draw</h1>
+        <p style="color:var(--text-muted);margin:10px 0 24px;">Enter your details to get your pick.</p>
+        <div class="field">
+          <label for="joinName">Your name</label>
+          <input id="joinName" type="text" placeholder="e.g. Alex Tan" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="joinPhone">Phone number</label>
+          <input id="joinPhone" type="tel" placeholder="e.g. 012-3456789" autocomplete="tel">
+        </div>
+        <button class="primary-btn" data-action="join">Join Game →</button>
+        <p class="error-text" id="joinError"></p>
+      </div>
+    `;
+  }
+
+  function renderWaitingHTML(me){
+    return `
+      <div class="screen">
+        <div class="eyebrow">You're in, ${escapeHtml(me.name)}!</div>
+        <h1 style="font-size:26px;">Hang tight</h1>
+        <div class="waiting-spinner"></div>
+        <p style="color:var(--text-muted);">Waiting for the host to start the draw…</p>
+      </div>
+    `;
+  }
+
+  function renderPickHTML(){
+    const me = game.players[myPhone];
+    const boxes = game.board.map((slot, i) => {
+      const taken = !!slot.claimedBy;
+      return `
+        <button class="box ${taken ? 'locked taken-box' : ''}" ${taken ? 'disabled' : `data-action="pick" data-index="${i}"`}>
+          <div class="box-inner">
+            <div class="box-face box-front">
+              <div class="gift-icon">${taken ? '🔒' : '🎁'}</div>
+              <div class="num">${taken ? 'TAKEN' : 'BOX ' + (i + 1)}</div>
+            </div>
+          </div>
+        </button>`;
+    }).join('');
+
+    return `
+      <div class="screen" style="max-width:520px;">
+        <div class="eyebrow">Hi ${escapeHtml(me.name)} — your turn!</div>
+        <h1 style="font-size:26px;">Pick a Box</h1>
+        <p style="color:var(--text-muted);margin-bottom:18px;">Tap any unclaimed box. You get one pick.</p>
+      </div>
+      <div class="grid" style="max-width:520px;margin:0 auto;">${boxes}</div>
+      <div class="sidebar" style="max-width:520px;margin:24px auto 0;">
+        <h2>Prize Pool</h2>
+        ${poolHtml()}
+      </div>
+    `;
+  }
+
+  function renderResultHTML(me){
+    const prize = PRIZES.find(p => p.id === game.board[me.pickedIndex].prizeId);
+    const isTry = !!prize.isTryAgain;
+    return `
+      <div class="screen">
+        <span style="font-size:64px;display:block;">${prize.icon}</span>
+        <h1 style="font-size:26px;margin:10px 0 4px;">${isTry ? 'So close!' : 'Congratulations!'}</h1>
+        <div style="font-size:17px;font-weight:600;color:${isTry ? 'var(--slate)' : 'var(--gold-soft)'};margin-bottom:14px;">
+          ${isTry ? prize.name : 'You won: ' + prize.name}
+        </div>
+        <p style="color:var(--text-muted);font-size:13px;">
+          ${isTry ? 'No prize this time — thanks for playing!' : 'Show this screen to the host to collect your prize.'}
+        </p>
+      </div>
+    `;
+  }
+
+  function renderHostHTML(){
+    const joinUrl = location.origin + location.pathname;
+    const playerCount = Object.keys(game.players).length;
+    const boxes = (game.board || []).map((slot, i) => {
+      const taken = !!slot.claimedBy;
+      return `
+        <div class="box ${taken ? 'locked taken-box' : ''}">
+          <div class="box-inner">
+            <div class="box-face box-front">
+              <div class="gift-icon">${taken ? '✅' : '🎁'}</div>
+              <div class="num">${taken ? escapeHtml(slot.claimedName || 'Taken') : 'BOX ' + (i + 1)}</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <header>
+        <div class="eyebrow">Host Display</div>
+        <h1>LUCKY DRAW</h1>
+        <p>${playerCount} player${playerCount === 1 ? '' : 's'} joined · ${game.started ? 'Draw in progress' : 'Not started yet'}</p>
+      </header>
+      <div style="text-align:center;">
+        <div class="qr-card" id="qrCard"></div>
+        <div class="link-row">
+          <input id="joinLinkInput" readonly value="${joinUrl}">
+          <button class="copy-btn" data-action="copy-link">Copy</button>
+        </div>
+        <button class="primary-btn" style="max-width:260px;margin:18px auto 30px;" data-action="start-game">
+          ${game.started ? '↻ Reset Game' : '▶ Start Game'}
+        </button>
+      </div>
+      <div class="layout">
+        <div class="board">
+          <div class="grid">${boxes || '<p style="color:var(--text-muted);grid-column:1/-1;">Click "Start Game" to shuffle prizes into boxes.</p>'}</div>
+        </div>
+        <div class="sidebar">
+          <h2>Prize Pool</h2>
+          ${poolHtml()}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderQr(){
+    const card = document.getElementById('qrCard');
+    if(!card) return;
+    card.innerHTML = '';
+    if(window.QRCode){
+      new QRCode(card, {
+        text: location.origin + location.pathname,
+        width: 170, height: 170,
+        colorDark: '#1A1540', colorLight: '#ffffff'
+      });
+    } else {
+      card.innerHTML = '<p style="color:#333;font-size:12px;padding:20px;">QR library failed to load — share the link below instead.</p>';
+    }
+  }
+
+  async function handleJoin(){
+    const name = document.getElementById('joinName').value.trim();
+    const phone = document.getElementById('joinPhone').value.trim();
+    const errorEl = document.getElementById('joinError');
+    if(!name || !phone){ errorEl.textContent = 'Please fill in both name and phone number.'; return; }
+    if(phone.replace(/\D/g, '').length < 8){ errorEl.textContent = 'Please enter a valid phone number.'; return; }
+
+    game = await loadGame();
+    if(!game.players[phone]){
+      game.players[phone] = { name, phone, joinedAt: Date.now(), pickedIndex: null };
+    } else {
+      game.players[phone].name = name;
+    }
+    await saveGame(game);
+    myPhone = phone;
+    const url = new URL(location.href);
+    url.searchParams.set('phone', phone);
+    history.replaceState({}, '', url);
+    render();
+  }
+
+  async function handlePick(index){
+    game = await loadGame();
+    const me = game.players[myPhone];
+    if(!me || me.pickedIndex !== null || !game.board || !game.board[index] || game.board[index].claimedBy){
+      render();
+      return;
+    }
+    game.board[index].claimedBy = myPhone;
+    game.board[index].claimedName = me.name;
+    me.pickedIndex = index;
+    await saveGame(game);
+    render();
+  }
+
+  async function handleStartGame(){
+    game = await loadGame();
+    if(game.started){
+      if(!confirm("Reset the game? This clears everyone's picks and reshuffles prizes.")) return;
+    }
+    game.board = buildBoard();
+    game.players = {};
+    game.started = true;
+    await saveGame(game);
+    render();
+  }
+
+  function handleCopyLink(){
+    const input = document.getElementById('joinLinkInput');
+    input.select();
+    try{ navigator.clipboard.writeText(input.value); }
+    catch(e){ document.execCommand('copy'); }
+  }
+
+  document.getElementById('app').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if(!btn) return;
+    const action = btn.dataset.action;
+    if(action === 'join') handleJoin();
+    else if(action === 'pick') handlePick(parseInt(btn.dataset.index, 10));
+    else if(action === 'start-game') handleStartGame();
+    else if(action === 'copy-link') handleCopyLink();
+  });
+
+  function launchConfetti(){
+    const colors = ['#F5B942', '#3DDBD9', '#FF8FD6', '#5FD97A', '#FFDE9E'];
+    const layer = document.getElementById('confettiLayer');
+    for(let i = 0; i < 70; i++){
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (2.2 + Math.random() * 1.6) + 's';
+      el.style.animationDelay = (Math.random() * 0.4) + 's';
+      el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }
+  }
+
+  const sparkleField = document.getElementById('sparkleField');
+  for(let i = 0; i < 26; i++){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.left = Math.random() * 100 + 'vw';
+    s.style.top = Math.random() * 100 + 'vh';
+    s.style.animationDelay = (Math.random() * 8) + 's';
+    s.style.animationDuration = (6 + Math.random() * 6) + 's';
+    sparkleField.appendChild(s);
+  }
+
+  refresh();
+  setInterval(() => { if(POLLABLE.includes(currentScreen)) refresh(); }, 3000);
+</script>
+</body>
+</html>
