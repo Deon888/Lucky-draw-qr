@@ -128,15 +128,15 @@
   .board-footer{ margin-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
   .progress-text{ font-size:13px; color:var(--text-muted); }
   .progress-text b{ color:var(--text); }
-  .reset-btn{
+  .ghost-btn{
     font-family:var(--font-body); font-weight:600; font-size:13px;
     background:transparent; color:var(--text-muted);
     border:1px solid var(--panel-line); border-radius:8px;
     padding:9px 16px; cursor:pointer; transition:all 0.2s;
   }
-  .reset-btn:hover{ color:var(--text); border-color:var(--cyan); }
+  .ghost-btn:hover{ color:var(--text); border-color:var(--cyan); }
 
-  .screen{ max-width:400px; margin:40px auto; text-align:center; padding:0 6px; }
+  .screen{ max-width:400px; margin:20px auto; text-align:center; padding:0 6px; }
   .field{ margin-bottom:14px; text-align:left; }
   .field label{ font-size:12px; color:var(--text-muted); margin-bottom:6px; display:block; font-weight:600; }
   .field input{ width:100%; padding:13px 14px; border-radius:10px; border:1px solid var(--panel-line); background:rgba(255,255,255,0.04); color:var(--text); font-size:15px; font-family:var(--font-body); }
@@ -146,6 +146,13 @@
   .primary-btn:hover{ transform:translateY(-1px); }
 
   .error-text{ color:var(--danger); font-size:12px; margin-top:10px; min-height:14px; }
+
+  .winners-row{ display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--panel-line); font-size:12px; }
+  .winners-row:last-child{ border-bottom:none; }
+  .winners-row .w-icon{ font-size:16px; }
+  .winners-row .w-info{ flex:1; min-width:0; }
+  .winners-row .w-info .w-name{ font-weight:600; color:var(--text); }
+  .winners-row .w-info .w-meta{ color:var(--text-muted); font-size:11px; }
 
   .confetti-layer{ position:fixed; inset:0; pointer-events:none; z-index:60; overflow:hidden; }
   .confetti-piece{ position:absolute; top:-20px; width:8px; height:14px; opacity:0.95; animation:fall linear forwards; }
@@ -168,10 +175,10 @@
   ];
   const TOTAL_SLOTS = PRIZES.reduce((sum, p) => sum + p.qty, 0);
 
-  let board = [];        // shuffled slots for this round: {prizeId, claimedBy, claimedName}
-  let players = {};      // phone -> {name, pickedIndex}
-  let activePhone = null;
-  let screen = 'join';   // 'join' | 'pick' | 'result'
+  let board = [];         // {prizeId, claimedBy, claimedName, claimedPhone}
+  let winners = [];       // {name, phone, prizeId, boxIndex}
+  let pendingIndex = null;
+  let screen = 'pick';    // 'pick' | 'claim' | 'result' | 'winners'
 
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -187,7 +194,7 @@
 
   function buildBoard(){
     const pool = [];
-    PRIZES.forEach(p => { for(let i = 0; i < p.qty; i++) pool.push({ prizeId:p.id, claimedBy:null, claimedName:null }); });
+    PRIZES.forEach(p => { for(let i = 0; i < p.qty; i++) pool.push({ prizeId:p.id, claimedBy:null, claimedName:null, claimedPhone:null }); });
     return shuffle(pool);
   }
 
@@ -216,39 +223,13 @@
 
   function render(){
     const app = document.getElementById('app');
-    if(screen === 'join') app.innerHTML = renderJoinHTML();
-    else if(screen === 'pick') app.innerHTML = renderPickHTML();
+    if(screen === 'pick') app.innerHTML = renderPickHTML();
+    else if(screen === 'claim') app.innerHTML = renderClaimHTML();
+    else if(screen === 'winners') app.innerHTML = renderWinnersHTML();
     else app.innerHTML = renderResultHTML();
   }
 
-  function renderJoinHTML(){
-    return `
-      <header>
-        <div class="eyebrow">Team Icebreaker</div>
-        <h1>LUCKY DRAW</h1>
-        <p>Key in your details to take your turn.</p>
-      </header>
-      <div class="screen">
-        <div class="field">
-          <label for="joinName">Your name</label>
-          <input id="joinName" type="text" placeholder="e.g. Alex Tan" autocomplete="name">
-        </div>
-        <div class="field">
-          <label for="joinPhone">Phone number</label>
-          <input id="joinPhone" type="tel" placeholder="e.g. 012-3456789" autocomplete="tel">
-        </div>
-        <button class="primary-btn" data-action="join">Join &amp; Pick a Box →</button>
-        <p class="error-text" id="joinError"></p>
-      </div>
-      <div style="max-width:420px;margin:20px auto 0;text-align:center;">
-        <div class="progress-text"><b>${openedCount()}</b> of <b>${TOTAL_SLOTS}</b> boxes opened</div>
-        <button class="reset-btn" style="margin-top:12px;" data-action="reset-game">↻ Reset game</button>
-      </div>
-    `;
-  }
-
   function renderPickHTML(){
-    const me = players[activePhone];
     const boxes = board.map((slot, i) => {
       const taken = !!slot.claimedBy;
       const prize = PRIZES.find(p => p.id === slot.prizeId);
@@ -263,7 +244,7 @@
             <div class="box-face box-back" style="--prize-color:${prize.color}">
               <div class="prize-icon">${taken ? prize.icon : ''}</div>
               <div class="prize-name">${taken ? prize.name : ''}</div>
-              ${taken ? `<div class="claimed-by">${escapeHtml(slot.claimedName)}</div>` : ''}
+              ${taken && slot.claimedName ? `<div class="claimed-by">${escapeHtml(slot.claimedName)}</div>` : ''}
             </div>
           </div>
         </button>`;
@@ -271,105 +252,147 @@
 
     return `
       <header>
-        <div class="eyebrow">Hi ${escapeHtml(me.name)} — your turn!</div>
-        <h1 style="font-size:clamp(28px,5vw,44px);">Pick a Box</h1>
-        <p>Tap any unclaimed box. You get one pick.</p>
+        <div class="eyebrow">Team Icebreaker</div>
+        <h1>LUCKY DRAW</h1>
+        <p>Tap any box to take your turn.</p>
       </header>
       <div class="layout">
         <div class="board">
           <div class="grid">${boxes}</div>
+          <div class="board-footer">
+            <div class="progress-text"><b>${openedCount()}</b> of <b>${TOTAL_SLOTS}</b> boxes opened</div>
+            <div style="display:flex; gap:8px;">
+              <button class="ghost-btn" data-action="show-winners">📋 Winners (${winners.length})</button>
+              <button class="ghost-btn" data-action="reset-game">↻ Reset game</button>
+            </div>
+          </div>
         </div>
         <div class="sidebar">
           <h2>Prize Pool</h2>
           ${poolHtml()}
         </div>
+      </div>
+    `;
+  }
+
+  function renderClaimHTML(){
+    const prize = PRIZES.find(p => p.id === board[pendingIndex].prizeId);
+    return `
+      <header>
+        <div class="eyebrow">Box ${pendingIndex + 1}</div>
+        <h1 style="font-size:clamp(28px,5vw,44px);">You Won!</h1>
+      </header>
+      <div class="screen">
+        <span style="font-size:56px;display:block;">${prize.icon}</span>
+        <div style="font-size:18px;font-weight:600;color:var(--gold-soft);margin:10px 0 20px;">${prize.name}</div>
+        <p style="color:var(--text-muted);font-size:13px;margin-bottom:18px;">Enter your details to claim this prize.</p>
+        <div class="field">
+          <label for="claimName">Your name</label>
+          <input id="claimName" type="text" placeholder="e.g. Alex Tan" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="claimPhone">Phone number</label>
+          <input id="claimPhone" type="tel" placeholder="e.g. 012-3456789" autocomplete="tel">
+        </div>
+        <button class="primary-btn" data-action="submit-claim">Submit &amp; Claim →</button>
+        <p class="error-text" id="claimError"></p>
       </div>
     `;
   }
 
   function renderResultHTML(){
-    const me = players[activePhone];
-    const prize = PRIZES.find(p => p.id === board[me.pickedIndex].prizeId);
+    const slot = board[pendingIndex];
+    const prize = PRIZES.find(p => p.id === slot.prizeId);
     const isTry = !!prize.isTryAgain;
     return `
       <header>
-        <div class="eyebrow">${escapeHtml(me.name)}</div>
-        <h1 style="font-size:clamp(28px,5vw,44px);">${isTry ? 'So close!' : 'Congratulations!'}</h1>
+        <div class="eyebrow">Box ${pendingIndex + 1}</div>
+        <h1 style="font-size:clamp(28px,5vw,44px);">${isTry ? 'So close!' : 'Prize Claimed!'}</h1>
       </header>
       <div class="screen">
         <span style="font-size:64px;display:block;">${prize.icon}</span>
         <div style="font-size:18px;font-weight:600;color:${isTry ? 'var(--slate)' : 'var(--gold-soft)'};margin:10px 0 14px;">
-          ${isTry ? prize.name : 'You won: ' + prize.name}
+          ${isTry ? prize.name : prize.name}
         </div>
         <p style="color:var(--text-muted);font-size:13px;margin-bottom:26px;">
-          ${isTry ? 'No prize this time — thanks for playing!' : 'Show this screen to the host to collect your prize.'}
+          ${isTry ? 'No prize this time — thanks for playing!' : `Thanks ${escapeHtml(slot.claimedName)}! Show this screen to the host to collect your prize.`}
         </p>
         <button class="primary-btn" data-action="next-player">Next Player →</button>
-      </div>
-      <div style="max-width:420px;margin:20px auto 0;">
-        <div class="sidebar">
-          <h2>Prize Pool</h2>
-          ${poolHtml()}
-        </div>
       </div>
     `;
   }
 
-  function handleJoin(){
-    const name = document.getElementById('joinName').value.trim();
-    const phone = document.getElementById('joinPhone').value.trim();
-    const errorEl = document.getElementById('joinError');
+  function renderWinnersHTML(){
+    const rows = winners.length ? winners.map(w => {
+      const prize = PRIZES.find(p => p.id === w.prizeId);
+      return `
+        <div class="winners-row">
+          <div class="w-icon">${prize.icon}</div>
+          <div class="w-info">
+            <div class="w-name">${escapeHtml(w.name)} — ${prize.name}</div>
+            <div class="w-meta">${escapeHtml(w.phone)} · Box ${w.boxIndex + 1}</div>
+          </div>
+        </div>`;
+    }).join('') : `<p style="color:var(--text-muted);font-size:13px;">No prizes claimed yet.</p>`;
 
-    if(!name || !phone){ errorEl.textContent = 'Please fill in both name and phone number.'; return; }
-    if(phone.replace(/\D/g, '').length < 8){ errorEl.textContent = 'Please enter a valid phone number.'; return; }
-
-    if(players[phone] && players[phone].pickedIndex !== null){
-      // this phone already played - show their result instead of a new pick
-      activePhone = phone;
-      screen = 'result';
-      render();
-      return;
-    }
-
-    if(openedCount() >= TOTAL_SLOTS){
-      errorEl.textContent = 'All prizes have been claimed — thanks for playing!';
-      return;
-    }
-
-    players[phone] = players[phone] || { name, phone, pickedIndex: null };
-    players[phone].name = name;
-    activePhone = phone;
-    screen = 'pick';
-    render();
+    return `
+      <header>
+        <div class="eyebrow">Host Record</div>
+        <h1 style="font-size:clamp(28px,5vw,44px);">Winners List</h1>
+        <p>Names and numbers collected so far — for prize collection follow-up.</p>
+      </header>
+      <div class="screen" style="max-width:460px;">
+        <div class="sidebar" style="text-align:left;">
+          ${rows}
+        </div>
+        <button class="primary-btn" style="margin-top:20px;" data-action="back-to-game">← Back to Game</button>
+      </div>
+    `;
   }
 
   function handlePick(index){
     if(board[index].claimedBy) return;
-    const me = players[activePhone];
-    if(!me || me.pickedIndex !== null) return;
+    board[index].claimedBy = true;
+    pendingIndex = index;
+    const prize = PRIZES.find(p => p.id === board[index].prizeId);
+    if(prize.isTryAgain){
+      screen = 'result';
+    } else {
+      screen = 'claim';
+      launchConfetti();
+    }
+    render();
+  }
 
-    board[index].claimedBy = activePhone;
-    board[index].claimedName = me.name;
-    me.pickedIndex = index;
+  function handleSubmitClaim(){
+    const name = document.getElementById('claimName').value.trim();
+    const phone = document.getElementById('claimPhone').value.trim();
+    const errorEl = document.getElementById('claimError');
+    if(!name || !phone){ errorEl.textContent = 'Please fill in both name and phone number.'; return; }
+    if(phone.replace(/\D/g, '').length < 8){ errorEl.textContent = 'Please enter a valid phone number.'; return; }
+
+    board[pendingIndex].claimedName = name;
+    board[pendingIndex].claimedPhone = phone;
+    winners.push({ name, phone, prizeId: board[pendingIndex].prizeId, boxIndex: pendingIndex });
     screen = 'result';
     render();
-
-    const prize = PRIZES.find(p => p.id === board[index].prizeId);
-    if(!prize.isTryAgain) launchConfetti();
   }
 
   function handleNextPlayer(){
-    activePhone = null;
-    screen = 'join';
+    pendingIndex = null;
+    screen = 'pick';
     render();
   }
 
+  function handleShowWinners(){ screen = 'winners'; render(); }
+  function handleBackToGame(){ screen = 'pick'; render(); }
+
   function handleResetGame(){
-    if(!confirm('Reset the board? All boxes will be re-shuffled and player records cleared.')) return;
+    if(!confirm('Reset the board? All boxes will be re-shuffled and the winners list cleared.')) return;
     board = buildBoard();
-    players = {};
-    activePhone = null;
-    screen = 'join';
+    winners = [];
+    pendingIndex = null;
+    screen = 'pick';
     render();
   }
 
@@ -377,17 +400,18 @@
     const btn = e.target.closest('[data-action]');
     if(!btn) return;
     const action = btn.dataset.action;
-    if(action === 'join') handleJoin();
-    else if(action === 'pick') handlePick(parseInt(btn.dataset.index, 10));
+    if(action === 'pick') handlePick(parseInt(btn.dataset.index, 10));
+    else if(action === 'submit-claim') handleSubmitClaim();
     else if(action === 'next-player') handleNextPlayer();
+    else if(action === 'show-winners') handleShowWinners();
+    else if(action === 'back-to-game') handleBackToGame();
     else if(action === 'reset-game') handleResetGame();
   });
 
-  // allow Enter key to submit the join form
   document.getElementById('app').addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' && screen === 'join'){
+    if(e.key === 'Enter' && screen === 'claim'){
       const target = e.target;
-      if(target.id === 'joinName' || target.id === 'joinPhone') handleJoin();
+      if(target.id === 'claimName' || target.id === 'claimPhone') handleSubmitClaim();
     }
   });
 
